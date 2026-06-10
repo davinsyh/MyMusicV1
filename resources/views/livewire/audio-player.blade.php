@@ -48,12 +48,15 @@
 
             <button @click="togglePlay" :title="isPlaying ? 'Pause' : 'Play'"
                 class="sketchy-border w-10 h-10 md:w-12 md:h-12 rounded-full bg-primary-container hover:bg-inverse-primary flex items-center justify-center shadow-[2px_2px_0px_0px_rgba(28,27,27,1)] active:shadow-none active:translate-y-[2px] active:translate-x-[2px] transition-all group">
-                <template x-if="!isPlaying">
+                <template x-if="isLoading">
+                    <span class="material-symbols-outlined text-on-background text-2xl md:text-3xl animate-spin">sync</span>
+                </template>
+                <template x-if="!isLoading && !isPlaying">
                     <span
                         class="material-symbols-outlined text-on-background text-2xl md:text-3xl group-hover:scale-110 transition-transform"
                         style="font-variation-settings: 'FILL' 1;">play_arrow</span>
                 </template>
-                <template x-if="isPlaying">
+                <template x-if="!isLoading && isPlaying">
                     <span
                         class="material-symbols-outlined text-on-background text-2xl md:text-3xl group-hover:scale-110 transition-transform"
                         style="font-variation-settings: 'FILL' 1;">pause</span>
@@ -166,11 +169,14 @@
 
                             <button @click="togglePlay" :title="isPlaying ? 'Pause' : 'Play'"
                                 class="sketchy-border w-20 h-20 rounded-full bg-primary-container hover:bg-inverse-primary flex items-center justify-center shadow-[4px_4px_0px_0px_rgba(28,27,27,1)] active:shadow-none active:translate-y-[4px] active:translate-x-[4px] transition-all group">
-                                <template x-if="!isPlaying">
+                                <template x-if="isLoading">
+                                    <span class="material-symbols-outlined text-on-background text-5xl animate-spin">sync</span>
+                                </template>
+                                <template x-if="!isLoading && !isPlaying">
                                     <span class="material-symbols-outlined text-on-background text-5xl group-hover:scale-110 transition-transform"
                                         style="font-variation-settings: 'FILL' 1;">play_arrow</span>
                                 </template>
-                                <template x-if="isPlaying">
+                                <template x-if="!isLoading && isPlaying">
                                     <span class="material-symbols-outlined text-on-background text-5xl group-hover:scale-110 transition-transform"
                                         style="font-variation-settings: 'FILL' 1;">pause</span>
                                 </template>
@@ -225,12 +231,17 @@
                                 <template x-if="currentIndex === index">
                                     <div
                                         class="absolute inset-0 bg-primary/40 flex items-center justify-center backdrop-blur-[2px]">
-                                        <div class="text-white flex items-end justify-center h-4 gap-[2px]">
-                                            <!-- Equalizer animation -->
-                                            <div class="w-1 h-2 bg-surface animate-[bounce_1s_infinite]"></div>
-                                            <div class="w-1 h-4 bg-surface animate-[bounce_1.2s_infinite]"></div>
-                                            <div class="w-1 h-3 bg-surface animate-[bounce_0.8s_infinite]"></div>
-                                        </div>
+                                        <template x-if="isLoading">
+                                            <span class="material-symbols-outlined text-surface text-xl animate-spin">sync</span>
+                                        </template>
+                                        <template x-if="!isLoading">
+                                            <div class="text-white flex items-end justify-center h-4 gap-[2px]">
+                                                <!-- Equalizer animation -->
+                                                <div class="w-1 h-2 bg-surface animate-[bounce_1s_infinite]"></div>
+                                                <div class="w-1 h-4 bg-surface animate-[bounce_1.2s_infinite]"></div>
+                                                <div class="w-1 h-3 bg-surface animate-[bounce_0.8s_infinite]"></div>
+                                            </div>
+                                        </template>
                                     </div>
                                 </template>
                             </div>
@@ -253,7 +264,13 @@
 
     <!-- Hidden HTML5 Audio Element -->
     <audio x-ref="audioEl" @timeupdate="updateProgress" @ended="trackEnded" @loadedmetadata="setDuration"
-        @play="isPlaying = true" @pause="isPlaying = false"></audio>
+        @play="isPlaying = true" @pause="isPlaying = false; isLoading = false"
+        @playing="isPlaying = true; isLoading = false"
+        @waiting="isLoading = true"
+        @seeking="isLoading = true"
+        @seeked="isLoading = false"
+        @loadstart="isLoading = true"
+        @error="isLoading = false"></audio>
 
     <script>
         document.addEventListener('alpine:init', () => {
@@ -273,6 +290,7 @@
                 hoverTime: '',
                 isShuffle: false,
                 repeatMode: 0, // 0: off, 1: all, 2: one
+                isLoading: false,
 
                 init() {
                     this.$refs.audioEl.volume = this.volume;
@@ -351,6 +369,7 @@
                 async playTrack(track) {
                     this.currentTrack = track;
                     const trackId = track.id || track.videoId;
+                    this.isLoading = true;
 
                     @this.call('recordHistory', trackId, track.title, track.artist, track.thumbnail);
                     this.isSaved = await this.$wire.checkIsSaved(trackId);
@@ -368,10 +387,12 @@
                         } else {
                             console.error('No stream URL returned');
                             this.mockPlay();
+                            this.isLoading = false;
                         }
                     } catch (e) {
                         console.error(e);
                         this.mockPlay();
+                        this.isLoading = false;
                     }
                 },
 
