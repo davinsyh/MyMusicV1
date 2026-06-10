@@ -1,59 +1,88 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# MyMusic (Versi Jamendo API)
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+MyMusic adalah aplikasi pemutar musik berbasis web yang dibangun menggunakan **Laravel** (dengan **Livewire** dan **Alpine JS** untuk interface interaktif). Aplikasi ini telah dimigrasikan sepenuhnya untuk berintegrasi langsung dengan **Jamendo API** untuk pencarian lagu, penayangan kategori musik terpopuler, penampilan detail album, penjelajahan profil artis, dan pemutaran audio secara real-time.
 
-## About Laravel
+---
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## ⚡ Fitur Utama
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+- **Beranda Musik Interaktif**: Menyuguhkan kategori lagu terpopuler secara dinamis (Popular Hits, Rock Anthems, Chill Acoustic, Electronic Beats).
+- **Hot Albums**: Menampilkan album-album terpopuler pilihan dari Jamendo di halaman beranda.
+- **Pencarian Global**: Mencari **Lagu**, **Album**, dan **Artis** dari database Jamendo secara instan melalui dropdown pencarian.
+- **Profil Artis**: Menampilkan profil lengkap artis berserta daftar lagu terpopuler mereka.
+- **Audio Player Premium**: Pemutar musik canggih di bagian bawah layar yang dilengkapi kontrol putar/jeda, progress bar interaktif, pengatur volume, mode shuffle (acak), dan repeat (ulang).
+- **Riwayat Putar & Favorit**: Menyimpan lagu ke dalam daftar favorit serta mencatat riwayat pemutaran terakhir (memerlukan autentikasi user).
+- **Pembersihan Arsitektur**: Microservice Python eksternal untuk YouTube/Piped API telah dinonaktifkan sepenuhnya, membuat aplikasi ini lebih ringan, lebih aman, dan bebas dari isu pemblokiran bot YouTube.
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+---
 
-## Learning Laravel
+## 🛠️ Stack Teknologi
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+- **Backend**: Laravel 11+ (PHP 8.2+)
+- **Frontend**: Livewire 3, Alpine JS, TailwindCSS/Vanilla CSS (Sketchy-border design aesthetic)
+- **Database**: SQLite (untuk lokal) / AWS RDS MySQL (untuk produksi)
+- **API Sumber Data**: Jamendo API v3.0
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+---
 
-## Laravel Sponsors
+## 🚀 Panduan Instalasi Lokal
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+Ikuti langkah-langkah di bawah ini untuk menjalankan proyek ini di komputer lokal Anda:
 
-### Premium Partners
+### 1. Clone Repositori
+```bash
+git clone https://github.com/davinsyh/MyMusicV1.git
+cd MyMusicV1
+```
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+### 2. Install Dependensi PHP & Node.js
+```bash
+# Install package PHP
+composer install
 
-## Contributing
+# Install package Node.js
+npm install
+```
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+### 3. Konfigurasi Environment File
+Salin file `.env.example` menjadi `.env`:
+```bash
+cp .env.example .env
+```
+Buka file `.env` dan masukkan **Jamendo Client ID** Anda:
+```env
+JAMENDO_CLIENT_ID=kredensial_client_id_jamendo_anda
+```
 
-## Code of Conduct
+### 4. Generate App Key & Migrasi Database
+```bash
+# Generate key enkripsi Laravel
+php artisan key:generate
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+# Buat database sqlite kosong di database/database.sqlite (jika menggunakan sqlite)
+touch database/database.sqlite
 
-## Security Vulnerabilities
+# Jalankan migrasi database beserta seeder data pengujian
+php artisan migrate --seed
+```
+*Data login default pengujian:*
+- Email: `user@example.com` atau `admin@example.com`
+- Password: `password`
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+### 5. Jalankan Server Pengembangan
+Jalankan kedua perintah ini di terminal terpisah:
+```bash
+# Jalankan server Laravel (Port 8000)
+php artisan serve
 
-## License
+# Jalankan Vite dev server untuk compile assets
+npm run dev
+```
+Buka `http://localhost:8000` pada browser Anda.
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+---
+
+## 🌐 Panduan Deployment (AWS EC2 & RDS)
+
+Petunjuk lengkap mengenai langkah pembaruan server dan konfigurasi AWS RDS dapat dibaca pada berkas panduan deployment khusus:
+👉 **[Panduan Deployment AWS](aws_deployment_guide.md)**

@@ -8,58 +8,137 @@ use Illuminate\Support\Facades\Log;
 
 class MusicService
 {
+    protected string $clientId;
     protected string $baseUrl;
 
     public function __construct()
     {
-        $this->baseUrl = env('PYTHON_MICROSERVICE_URL', 'http://127.0.0.1:8000');
+        $this->clientId = env('JAMENDO_CLIENT_ID', '709fa152');
+        $this->baseUrl = 'https://api.jamendo.com/v3.0';
     }
 
     /**
-     * Search for tracks by query.
+     * Search for tracks, albums, and artists by query.
      */
     public function search(string $query)
     {
-        $cacheKey = 'ytmusic:search_v2:' . md5($query);
+        $cacheKey = 'jamendo:search:' . md5($query);
 
         return Cache::remember($cacheKey, now()->addMinutes(60), function () use ($query) {
             try {
-                $response = Http::timeout(10)->get($this->baseUrl . '/search', [
-                    'q' => $query
+                // 1. Search Artists
+                $artistsResponse = Http::timeout(10)->get($this->baseUrl . '/artists/', [
+                    'client_id' => $this->clientId,
+                    'format' => 'json',
+                    'namesearch' => $query,
+                    'limit' => 5,
                 ]);
 
-                if ($response->successful()) {
-                    return $response->json('data') ?? [];
+                $artists = [];
+                if ($artistsResponse->successful()) {
+                    $results = $artistsResponse->json('results') ?? [];
+                    $artists = array_map(function ($artist) {
+                        return [
+                            'id' => 'artist_' . $artist['id'],
+                            'type' => 'artist',
+                            'title' => $artist['name'] ?? 'Unknown',
+                            'artist' => 'Artist',
+                            'thumbnail' => $artist['image'] ?? '',
+                            'duration' => '',
+                        ];
+                    }, $results);
                 }
-                
-                Log::error('Python Microservice Search Error: ' . $response->body());
-                return [];
+
+                // 2. Search Albums
+                $albumsResponse = Http::timeout(10)->get($this->baseUrl . '/albums/', [
+                    'client_id' => $this->clientId,
+                    'format' => 'json',
+                    'namesearch' => $query,
+                    'limit' => 5,
+                    'imagesize' => '200',
+                ]);
+
+                $albums = [];
+                if ($albumsResponse->successful()) {
+                    $results = $albumsResponse->json('results') ?? [];
+                    $albums = array_map(function ($album) {
+                        return [
+                            'id' => 'album_' . $album['id'],
+                            'type' => 'album',
+                            'title' => $album['name'] ?? 'Unknown Album',
+                            'artist' => $album['artist_name'] ?? 'Unknown Artist',
+                            'thumbnail' => $album['image'] ?? '',
+                            'duration' => '',
+                        ];
+                    }, $results);
+                }
+
+                // 3. Search Tracks
+                $tracksResponse = Http::timeout(10)->get($this->baseUrl . '/tracks/', [
+                    'client_id' => $this->clientId,
+                    'format' => 'json',
+                    'namesearch' => $query,
+                    'limit' => 15,
+                    'include' => 'musicinfo',
+                    'imagesize' => '200',
+                ]);
+
+                $tracks = [];
+                if ($tracksResponse->successful()) {
+                    $results = $tracksResponse->json('results') ?? [];
+                    $tracks = array_map(function ($track) {
+                        return [
+                            'id' => $track['id'],
+                            'type' => 'video',
+                            'title' => $track['name'] ?? 'Unknown',
+                            'artist' => $track['artist_name'] ?? 'Unknown Artist',
+                            'thumbnail' => $track['image'] ?? $track['album_image'] ?? '',
+                            'duration' => gmdate("i:s", $track['duration'] ?? 0),
+                        ];
+                    }, $results);
+                }
+
+                return array_merge($artists, $albums, $tracks);
             } catch (\Exception $e) {
-                Log::error('Python Microservice Connection Error: ' . $e->getMessage());
+                Log::error('Jamendo API Search Error: ' . $e->getMessage());
                 return [];
             }
         });
     }
 
     /**
-     * Get top charts.
+     * Get top charts or popular items.
      */
     public function getCharts()
     {
-        $cacheKey = 'ytmusic:charts';
+        $cacheKey = 'jamendo:charts';
 
         return Cache::remember($cacheKey, now()->addMinutes(60), function () {
             try {
-                $response = Http::timeout(10)->get($this->baseUrl . '/charts');
+                $response = Http::timeout(10)->get($this->baseUrl . '/tracks/', [
+                    'client_id' => $this->clientId,
+                    'format' => 'json',
+                    'limit' => 20,
+                    'order' => 'popularity_total',
+                    'imagesize' => '200',
+                ]);
 
                 if ($response->successful()) {
-                    return $response->json('data') ?? [];
+                    $results = $response->json('results') ?? [];
+                    return array_map(function ($track) {
+                        return [
+                            'id' => $track['id'],
+                            'title' => $track['name'] ?? 'Unknown',
+                            'artist' => $track['artist_name'] ?? 'Unknown Artist',
+                            'thumbnail' => $track['image'] ?? $track['album_image'] ?? '',
+                        ];
+                    }, $results);
                 }
-                
-                Log::error('Python Microservice Charts Error: ' . $response->body());
+
+                Log::error('Jamendo API Charts Error: ' . $response->body());
                 return [];
             } catch (\Exception $e) {
-                Log::error('Python Microservice Connection Error: ' . $e->getMessage());
+                Log::error('Jamendo API Connection Error: ' . $e->getMessage());
                 return [];
             }
         });
@@ -70,23 +149,127 @@ class MusicService
      */
     public function getHomeSections()
     {
-        $cacheKey = 'ytmusic:home_sections_v2';
+        $cacheKey = 'jamendo:home_sections';
 
         return Cache::remember($cacheKey, now()->addMinutes(60), function () {
-            try {
-                $response = Http::timeout(10)->get($this->baseUrl . '/home');
+            $sections = [];
 
-                if ($response->successful()) {
-                    return $response->json('data') ?? [];
-                }
-                
-                Log::error('Python Microservice Home Error: ' . $response->body());
-                return [];
-            } catch (\Exception $e) {
-                Log::error('Python Microservice Connection Error: ' . $e->getMessage());
-                return [];
+            // 1. Popular Hits
+            $popular = $this->getCharts();
+            if (!empty($popular)) {
+                $sections[] = [
+                    'title' => 'Popular Hits',
+                    'contents' => array_map(function ($track) {
+                        return array_merge($track, ['type' => 'video']);
+                    }, $popular)
+                ];
             }
+
+            // 2. Hot Albums
+            $albums = $this->getPopularAlbums(10);
+            if (!empty($albums)) {
+                $sections[] = [
+                    'title' => 'Hot Albums',
+                    'contents' => $albums
+                ];
+            }
+
+            // 3. Genre Rock
+            $rock = $this->getGenreTracks('rock', 10);
+            if (!empty($rock)) {
+                $sections[] = [
+                    'title' => 'Rock Anthems',
+                    'contents' => $rock
+                ];
+            }
+
+            // 4. Genre Acoustic
+            $acoustic = $this->getGenreTracks('acoustic', 10);
+            if (!empty($acoustic)) {
+                $sections[] = [
+                    'title' => 'Chill Acoustic',
+                    'contents' => $acoustic
+                ];
+            }
+
+            // 5. Genre Electronic
+            $electronic = $this->getGenreTracks('electronic', 10);
+            if (!empty($electronic)) {
+                $sections[] = [
+                    'title' => 'Electronic Beats',
+                    'contents' => $electronic
+                ];
+            }
+
+            return $sections;
         });
+    }
+
+    /**
+     * Helper to get tracks by genre/tag.
+     */
+    protected function getGenreTracks(string $genre, int $limit = 10)
+    {
+        try {
+            $response = Http::timeout(10)->get($this->baseUrl . '/tracks/', [
+                'client_id' => $this->clientId,
+                'format' => 'json',
+                'limit' => $limit,
+                'fuzzytags' => $genre,
+                'order' => 'popularity_total',
+                'imagesize' => '200',
+            ]);
+
+            if ($response->successful()) {
+                $results = $response->json('results') ?? [];
+                return array_map(function ($track) {
+                    return [
+                        'id' => $track['id'],
+                        'type' => 'video',
+                        'title' => $track['name'] ?? 'Unknown',
+                        'artist' => $track['artist_name'] ?? 'Unknown Artist',
+                        'thumbnail' => $track['image'] ?? $track['album_image'] ?? '',
+                    ];
+                }, $results);
+            }
+        } catch (\Exception $e) {
+            Log::error("Jamendo Genre {$genre} Error: " . $e->getMessage());
+        }
+
+        return [];
+    }
+
+    /**
+     * Get popular albums.
+     */
+    public function getPopularAlbums(int $limit = 10)
+    {
+        try {
+            $response = Http::timeout(10)->get($this->baseUrl . '/albums/', [
+                'client_id' => $this->clientId,
+                'format' => 'json',
+                'limit' => $limit,
+                'order' => 'popularity_total',
+                'imagesize' => '200',
+            ]);
+
+            if ($response->successful()) {
+                $results = $response->json('results') ?? [];
+                return array_map(function ($album) {
+                    return [
+                        'id' => 'album_' . $album['id'],
+                        'type' => 'album',
+                        'title' => $album['name'] ?? 'Unknown Album',
+                        'artist' => $album['artist_name'] ?? 'Unknown Artist',
+                        'thumbnail' => $album['image'] ?? '',
+                    ];
+                }, $results);
+            }
+        } catch (\Exception $e) {
+            Log::error("Jamendo Popular Albums Error: " . $e->getMessage());
+        }
+
+        return [];
     }
 
     /**
@@ -94,20 +277,47 @@ class MusicService
      */
     public function getPlaylistDetails(string $id)
     {
-        $cacheKey = "ytmusic:playlist:{$id}";
+        $cacheKey = "jamendo:album:{$id}";
 
         return Cache::remember($cacheKey, now()->addMinutes(60), function () use ($id) {
             try {
-                $response = Http::timeout(10)->get($this->baseUrl . "/playlist/{$id}");
+                $response = Http::timeout(10)->get($this->baseUrl . '/albums/tracks/', [
+                    'client_id' => $this->clientId,
+                    'format' => 'json',
+                    'id' => $id,
+                    'imagesize' => '200',
+                ]);
 
                 if ($response->successful()) {
-                    return $response->json('data') ?? null;
+                    $results = $response->json('results') ?? [];
+                    if (empty($results)) {
+                        return null;
+                    }
+                    $album = $results[0];
+
+                    return [
+                        'id' => $album['id'],
+                        'title' => $album['name'] ?? 'Unknown Album',
+                        'description' => 'Album by ' . ($album['artist_name'] ?? 'Unknown'),
+                        'author' => $album['artist_name'] ?? 'Unknown',
+                        'trackCount' => count($album['tracks'] ?? []),
+                        'thumbnails' => $album['image'] ?? '',
+                        'tracks' => array_map(function ($t) use ($album) {
+                            return [
+                                'id' => $t['id'],
+                                'title' => $t['name'] ?? 'Unknown',
+                                'artist' => $album['artist_name'] ?? 'Unknown',
+                                'thumbnail' => $album['image'] ?? '',
+                                'duration' => gmdate("i:s", $t['duration'] ?? 0),
+                            ];
+                        }, $album['tracks'] ?? []),
+                    ];
                 }
-                
-                Log::error('Python Microservice Playlist Error: ' . $response->body());
+
+                Log::error('Jamendo API Album Error: ' . $response->body());
                 return null;
             } catch (\Exception $e) {
-                Log::error('Python Microservice Connection Error: ' . $e->getMessage());
+                Log::error('Jamendo API Connection Error: ' . $e->getMessage());
                 return null;
             }
         });
@@ -118,20 +328,103 @@ class MusicService
      */
     public function getTrack(string $id)
     {
-        $cacheKey = 'ytmusic:track:' . $id;
+        $cacheKey = 'jamendo:track:' . $id;
 
         return Cache::remember($cacheKey, now()->addMinutes(60), function () use ($id) {
             try {
-                $response = Http::timeout(10)->get($this->baseUrl . '/track/' . $id);
+                $response = Http::timeout(10)->get($this->baseUrl . '/tracks/', [
+                    'client_id' => $this->clientId,
+                    'format' => 'json',
+                    'id' => $id,
+                ]);
 
                 if ($response->successful()) {
-                    return $response->json('data') ?? null;
+                    $results = $response->json('results') ?? [];
+                    if (empty($results)) {
+                        return null;
+                    }
+                    $track = $results[0];
+
+                    return [
+                        'id' => $track['id'],
+                        'title' => $track['name'] ?? 'Unknown',
+                        'author' => $track['artist_name'] ?? 'Unknown',
+                        'thumbnail' => $track['image'] ?? $track['album_image'] ?? '',
+                        'stream_url' => $track['audio'] ?? '',
+                    ];
                 }
-                
-                Log::error('Python Microservice Track Error: ' . $response->body());
+
+                Log::error('Jamendo API Track Error: ' . $response->body());
                 return null;
             } catch (\Exception $e) {
-                Log::error('Python Microservice Connection Error: ' . $e->getMessage());
+                Log::error('Jamendo API Connection Error: ' . $e->getMessage());
+                return null;
+            }
+        });
+    }
+
+    /**
+     * Get artist details and tracks by ID.
+     */
+    public function getArtistDetails(string $id)
+    {
+        $cacheKey = "jamendo:artist:{$id}";
+
+        return Cache::remember($cacheKey, now()->addMinutes(60), function () use ($id) {
+            try {
+                // 1. Fetch artist profile
+                $artistResponse = Http::timeout(10)->get($this->baseUrl . '/artists/', [
+                    'client_id' => $this->clientId,
+                    'format' => 'json',
+                    'id' => $id,
+                ]);
+
+                if (!$artistResponse->successful()) {
+                    Log::error('Jamendo API Artist Profile Error: ' . $artistResponse->body());
+                    return null;
+                }
+
+                $artistResults = $artistResponse->json('results') ?? [];
+                if (empty($artistResults)) {
+                    return null;
+                }
+                $artist = $artistResults[0];
+
+                // 2. Fetch artist tracks
+                $tracksResponse = Http::timeout(10)->get($this->baseUrl . '/tracks/', [
+                    'client_id' => $this->clientId,
+                    'format' => 'json',
+                    'artist_id' => $id,
+                    'limit' => 20,
+                    'order' => 'popularity_total',
+                    'imagesize' => '200',
+                ]);
+
+                $tracks = [];
+                if ($tracksResponse->successful()) {
+                    $results = $tracksResponse->json('results') ?? [];
+                    $tracks = array_map(function ($track) {
+                        return [
+                            'id' => $track['id'],
+                            'title' => $track['name'] ?? 'Unknown',
+                            'artist' => $track['artist_name'] ?? 'Unknown Artist',
+                            'thumbnail' => $track['image'] ?? $track['album_image'] ?? '',
+                            'duration' => gmdate("i:s", $track['duration'] ?? 0),
+                        ];
+                    }, $results);
+                }
+
+                return [
+                    'id' => $artist['id'],
+                    'title' => $artist['name'] ?? 'Unknown Artist',
+                    'description' => 'Artist profile on Jamendo',
+                    'author' => 'Jamendo Artist',
+                    'trackCount' => count($tracks),
+                    'thumbnails' => $artist['image'] ?? '',
+                    'tracks' => $tracks,
+                ];
+            } catch (\Exception $e) {
+                Log::error('Jamendo API Artist Connection Error: ' . $e->getMessage());
                 return null;
             }
         });

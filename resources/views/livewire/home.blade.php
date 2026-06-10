@@ -62,7 +62,7 @@
                                     <span x-text="tracks[{{ $index }}].isSaved ? '{{ __('Remove from Favorite') }}' : '{{ __('Add to Favorite') }}'"></span>
                                 </button>
                                 <button
-                                    @click.prevent.stop="navigator.clipboard.writeText('https://music.youtube.com/watch?v={{ $play->yt_track_id }}'); alert('{{ __('Link bagikan disalin!') }}'); open = false"
+                                    @click.prevent.stop="navigator.clipboard.writeText('https://www.jamendo.com/track/{{ $play->yt_track_id }}'); alert('{{ __('Link bagikan disalin!') }}'); open = false"
                                     class="w-full text-left p-2 hover:bg-secondary-container/20 font-body-md flex items-center gap-2 text-[14px]">
                                     <span class="material-symbols-outlined text-sm">share</span>
                                     {{ __('Share Link') }}
@@ -153,7 +153,7 @@
                                             <span x-text="tracks[{{ $index }}].isSaved ? '{{ __('Remove from Favorite') }}' : '{{ __('Add to Favorite') }}'"></span>
                                         </button>
                                         <button
-                                            @click.prevent.stop="navigator.clipboard.writeText('{{ isset($track['type']) && $track['type'] !== 'video' ? url('/playlist/' . $track['id']) : 'https://music.youtube.com/watch?v=' . $track['id'] }}'); alert('{{ __('Link bagikan disalin!') }}'); open = false"
+                                            @click.prevent.stop="navigator.clipboard.writeText('{{ isset($track['type']) && $track['type'] !== 'video' ? url('/playlist/' . $track['id']) : 'https://www.jamendo.com/track/' . $track['id'] }}'); alert('{{ __('Link bagikan disalin!') }}'); open = false"
                                             class="w-full text-left p-2 hover:bg-secondary-container/20 font-body-md flex items-center gap-2 text-[14px]">
                                             <span class="material-symbols-outlined text-sm">share</span>
                                             {{ __('Share Link') }}

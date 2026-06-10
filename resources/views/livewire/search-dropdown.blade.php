@@ -1,4 +1,4 @@
-<div class="relative w-full max-w-xl mx-auto" x-data="{ open: false }">
+<div class="relative w-full max-w-xl mx-auto" x-data="{ open: false }" @click.outside="open = false">
     <div class="relative flex items-center">
         <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
             <svg class="h-5 w-5 text-text-main/50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -8,7 +8,6 @@
         <input 
             wire:model.live.debounce.300ms="query" 
             @focus="open = true"
-            @click.away="open = false"
             @keydown.escape="open = false"
             type="text" 
             placeholder="Search songs, artists..." 

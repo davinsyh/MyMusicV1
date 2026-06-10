@@ -73,17 +73,35 @@ class Playlist extends Component
                 'tracks' => $tracks
             ];
         } else {
-            if (str_starts_with($id, 'MPREb_') || str_starts_with($id, 'browseId')) {
+            if (str_starts_with($id, 'album_')) {
                 $this->type = 'Album';
-            } elseif (str_starts_with($id, 'UC')) {
+                $realId = substr($id, 6);
+                $this->playlistDetails = $musicService->getPlaylistDetails($realId);
+            } elseif (str_starts_with($id, 'artist_')) {
                 $this->type = 'Artist';
-            } elseif (str_starts_with($id, 'MPSP')) {
-                $this->type = 'Podcast';
-            } else {
+                $realId = substr($id, 7);
+                $this->playlistDetails = $musicService->getArtistDetails($realId);
+            } elseif (str_starts_with($id, 'playlist_')) {
                 $this->type = 'Playlist';
-            }
+                $realId = substr($id, 9);
+                $this->playlistDetails = $musicService->getPlaylistDetails($realId);
+            } else {
+                if (str_starts_with($id, 'MPREb_') || str_starts_with($id, 'browseId')) {
+                    $this->type = 'Album';
+                } elseif (str_starts_with($id, 'UC')) {
+                    $this->type = 'Artist';
+                } elseif (str_starts_with($id, 'MPSP')) {
+                    $this->type = 'Podcast';
+                } else {
+                    $this->type = 'Playlist';
+                }
 
-            $this->playlistDetails = $musicService->getPlaylistDetails($id);
+                if ($this->type === 'Artist') {
+                    $this->playlistDetails = $musicService->getArtistDetails($id);
+                } else {
+                    $this->playlistDetails = $musicService->getPlaylistDetails($id);
+                }
+            }
 
             if (!$this->playlistDetails) {
                 abort(404, 'Playlist not found or unavailable');
