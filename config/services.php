@@ -35,4 +35,8 @@ return [
         ],
     ],
 
+    'jamendo' => [
+        'client_id' => env('JAMENDO_CLIENT_ID', '703c0591'),
+    ],
+
 ];

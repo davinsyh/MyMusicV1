@@ -13,7 +13,7 @@ class MusicService
 
     public function __construct()
     {
-        $this->clientId = env('JAMENDO_CLIENT_ID', '709fa152');
+        $this->clientId = config('services.jamendo.client_id', '703c0591');
         $this->baseUrl = 'https://api.jamendo.com/v3.0';
     }
 
