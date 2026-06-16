@@ -462,13 +462,11 @@
                     this.isLoading = true;
                     this.recommendations = [];
 
-                    @this.call('recordHistory', trackId, track.title, track.artist, track.thumbnail);
-                    this.isSaved = await this.$wire.checkIsSaved(trackId);
-
                     if (this.mockInterval) clearInterval(this.mockInterval);
 
                     this.fetchRecommendations(trackId);
 
+                    // 1. Play the audio immediately
                     try {
                         const response = await fetch(`/api/track/${trackId}`);
                         const data = await response.json();
@@ -483,9 +481,21 @@
                             this.isLoading = false;
                         }
                     } catch (e) {
-                        console.error(e);
+                        console.error('Error fetching stream:', e);
                         this.mockPlay();
                         this.isLoading = false;
+                    }
+
+                    // 2. Perform Livewire history/favorite updates in the background without blocking audio
+                    try {
+                        @auth
+                            @this.call('recordHistory', String(trackId), track.title || 'Unknown', track.artist || 'Unknown Artist', track.thumbnail || '');
+                            this.isSaved = await this.$wire.checkIsSaved(String(trackId));
+                        @else
+                            this.isSaved = false;
+                        @endauth
+                    } catch (lwError) {
+                        console.error('Livewire background update failed:', lwError);
                     }
                 },
 
