@@ -293,7 +293,7 @@
                             <div class="space-y-4">
                                 <template x-for="(track, index) in recommendations" :key="'rec_' + index">
                                     <div class="flex items-center p-3 rounded-xl cursor-pointer transition-all sketchy-border hover:bg-secondary-container/30 hover:rotate-[-1deg] bg-surface group"
-                                        @click="queue.push(track); currentIndex = queue.length - 1; playTrack(track)">
+                                        @click="playRecommended(track)">
                                         <div class="relative h-14 w-14 shrink-0 rounded-lg overflow-hidden border-2 border-on-background">
                                             <img :src="track.thumbnail" class="object-cover w-full h-full group-hover:scale-110 transition duration-300">
                                         </div>
@@ -405,8 +405,13 @@
                             this.playTrack(this.queue[this.currentIndex]);
                         } else if (this.autoplayMode && this.recommendations.length > 0) {
                             const nextRec = this.recommendations[0];
-                            this.queue.push(nextRec);
-                            this.currentIndex = this.queue.length - 1;
+                            if (!this.queueContext) {
+                                this.queue = [nextRec];
+                                this.currentIndex = 0;
+                            } else {
+                                this.queue.push(nextRec);
+                                this.currentIndex = this.queue.length - 1;
+                            }
                             this.playTrack(nextRec);
                         }
                     }
@@ -422,6 +427,17 @@
                             this.playTrack(this.queue[this.currentIndex]);
                         }
                     }
+                },
+
+                playRecommended(track) {
+                    if (!this.queueContext) {
+                        this.queue = [track];
+                        this.currentIndex = 0;
+                    } else {
+                        this.queue.push(track);
+                        this.currentIndex = this.queue.length - 1;
+                    }
+                    this.playTrack(track);
                 },
 
                 async fetchRecommendations(trackId) {
@@ -561,8 +577,13 @@
                             this.nextTrack(); // nextTrack already handles looping
                         } else if (this.autoplayMode && this.recommendations.length > 0) {
                             const nextRec = this.recommendations[0];
-                            this.queue.push(nextRec);
-                            this.currentIndex = this.queue.length - 1;
+                            if (!this.queueContext) {
+                                this.queue = [nextRec];
+                                this.currentIndex = 0;
+                            } else {
+                                this.queue.push(nextRec);
+                                this.currentIndex = this.queue.length - 1;
+                            }
                             this.playTrack(nextRec);
                         }
                     }
