@@ -60,7 +60,7 @@
                 <tbody class="font-body-md">
                     <template x-for="(track, index) in tracks" :key="track.videoId || track.id">
                     <tr class="group hover:bg-secondary-container/20 transition-colors border-b border-dashed border-outline-variant cursor-pointer last:border-b-0"
-                        x-on:click="$dispatch('play-queue', { queue: tracks, index: index, context: { title: {{ \Illuminate\Support\Js::from($playlistDetails['title']) }}, type: {{ \Illuminate\Support\Js::from($type) }}, author: {{ \Illuminate\Support\Js::from($playlistDetails['author']) }} } })">
+                        x-on:click="$dispatch('play-queue', { queue: [track], index: 0 })">
                         <td class="p-4 text-on-surface-variant text-center relative w-16">
                             <span class="group-hover:opacity-0 transition-opacity" x-text="index + 1"></span>
                             <span class="material-symbols-outlined absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 text-primary transition-opacity" style="font-variation-settings: 'FILL' 1;">play_arrow</span>

@@ -32,3 +32,7 @@ Route::middleware(['auth', 'admin'])->group(function () {
 Route::get('/api/track/{id}', function ($id, \App\Services\MusicService $musicService) {
     return response()->json($musicService->getTrack($id));
 });
+
+Route::get('/api/track/{id}/recommendations', function ($id, \App\Services\MusicService $musicService) {
+    return response()->json($musicService->getRecommendations($id));
+});

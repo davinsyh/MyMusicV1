@@ -429,4 +429,83 @@ class MusicService
             }
         });
     }
+
+    /**
+     * Get recommended tracks based on a track's genres/tags or artist.
+     */
+    public function getRecommendations(string $trackId)
+    {
+        $cacheKey = 'jamendo:recommendations:' . $trackId;
+
+        return Cache::remember($cacheKey, now()->addMinutes(60), function () use ($trackId) {
+            try {
+                // 1. Fetch current track details including musicinfo for tags
+                $response = Http::timeout(10)->get($this->baseUrl . '/tracks/', [
+                    'client_id' => $this->clientId,
+                    'format' => 'json',
+                    'id' => $trackId,
+                    'include' => 'musicinfo',
+                ]);
+
+                if (!$response->successful()) {
+                    return [];
+                }
+
+                $results = $response->json('results') ?? [];
+                if (empty($results)) {
+                    return [];
+                }
+
+                $track = $results[0];
+                $artistId = $track['artist_id'] ?? null;
+                
+                // Get genres from musicinfo
+                $genres = $track['musicinfo']['tags']['genres'] ?? [];
+                
+                $params = [
+                    'client_id' => $this->clientId,
+                    'format' => 'json',
+                    'limit' => 10,
+                    'order' => 'popularity_total',
+                    'imagesize' => '200',
+                ];
+
+                // If genres are available, use fuzzytags for recommendations
+                if (!empty($genres)) {
+                    $params['fuzzytags'] = implode(' ', array_slice($genres, 0, 2));
+                } elseif ($artistId) {
+                    $params['artist_id'] = $artistId;
+                } else {
+                    $params['order'] = 'popularity_total';
+                }
+
+                $recResponse = Http::timeout(10)->get($this->baseUrl . '/tracks/', $params);
+
+                if ($recResponse->successful()) {
+                    $recResults = $recResponse->json('results') ?? [];
+                    
+                    // Exclude the current track
+                    $filtered = array_filter($recResults, function ($t) use ($trackId) {
+                        return $t['id'] !== $trackId;
+                    });
+
+                    return array_map(function ($t) {
+                        return [
+                            'id' => $t['id'],
+                            'type' => 'video',
+                            'title' => $t['name'] ?? 'Unknown',
+                            'artist' => $t['artist_name'] ?? 'Unknown Artist',
+                            'thumbnail' => $t['image'] ?? $t['album_image'] ?? '',
+                            'duration' => gmdate("i:s", $t['duration'] ?? 0),
+                        ];
+                    }, array_slice($filtered, 0, 5));
+                }
+
+                return [];
+            } catch (\Exception $e) {
+                Log::error('Jamendo recommendations fetch failed: ' . $e->getMessage());
+                return [];
+            }
+        });
+    }
 }

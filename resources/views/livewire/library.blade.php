@@ -39,7 +39,7 @@
                 <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
                     @foreach($items as $index => $item)
                         <tr class="hover:bg-gray-50 dark:hover:bg-gray-750 transition cursor-pointer group"
-                            x-on:click="$dispatch('play-queue', { queue: tracks, index: {{ $index }} })">
+                            x-on:click="$dispatch('play-queue', { queue: [tracks[{{ $index }}]], index: 0 })">
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400 w-12 text-center group-hover:hidden">
                                 {{ $items->firstItem() + $index }}
                             </td>

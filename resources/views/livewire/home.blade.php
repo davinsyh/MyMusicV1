@@ -31,7 +31,7 @@
                     <!-- Track Card -->
                     <div class="flex-none w-64 sketchy-border p-4 bg-surface block-shadow group cursor-pointer"
                         style="transform: rotate({{ $rotation }});"
-                        x-on:click="$dispatch('play-queue', { queue: tracks, index: {{ $index }} })">
+                        x-on:click="$dispatch('play-queue', { queue: [tracks[{{ $index }}]], index: 0 })">
                         <div class="relative aspect-square mb-4 overflow-hidden rounded">
                             <img alt="{{ $play->track_title }}"
                                 class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
@@ -120,7 +120,7 @@
                             <div class="sketchy-border p-4 bg-surface block-shadow group cursor-pointer transition-all hover:rotate-[0deg]"
                                 style="transform: rotate({{ $rotation }});" @if(isset($track['type']) && $track['type'] !== 'video')
                                 x-on:click="Livewire.navigate('{{ route('playlist.show', $track['id']) }}')" @else
-                                x-on:click="$dispatch('play-queue', { queue: tracks, index: {{ $index }} })" @endif>
+                                x-on:click="$dispatch('play-queue', { queue: [tracks[{{ $index }}]], index: 0 })" @endif>
                                 <div
                                     class="relative {{ $isShort ? 'aspect-[9/16]' : 'aspect-square' }} mb-4 overflow-hidden rounded">
                                     <img alt="{{ $track['title'] }}"

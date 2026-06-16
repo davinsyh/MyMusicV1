@@ -40,11 +40,15 @@
         @else
             <div class="p-2 space-y-1" wire:loading.remove wire:target="query">
                 @foreach($results as $index => $track)
+                    @php
+                        $cleanTitle = is_array($track['title'] ?? null) ? implode(', ', $track['title']) : ($track['title'] ?? 'Unknown Title');
+                        $cleanArtist = is_array($track['artist'] ?? null) ? (isset($track['artist'][0]['name']) ? collect($track['artist'])->pluck('name')->implode(', ') : implode(', ', $track['artist'])) : ($track['artist'] ?? 'Unknown Artist');
+                    @endphp
                     <div class="flex items-center p-2 hover:bg-primary/10 rounded-lg cursor-pointer transition-colors group relative"
                          @if(isset($track['type']) && $track['type'] !== 'video')
                             wire:navigate href="{{ route('playlist.show', $track['id']) }}"
                          @else
-                            x-on:click="$dispatch('play-queue', { queue: tracks, index: {{ collect($results)->where('type', 'video')->keys()->search($index) !== false ? collect($results)->where('type', 'video')->keys()->search($index) : 0 }} }); open = false; $wire.set('query', '')"
+                            x-on:click="$dispatch('play-queue', { queue: [ { id: '{{ $track['id'] }}', title: {{ \Illuminate\Support\Js::from($cleanTitle) }}, artist: {{ \Illuminate\Support\Js::from($cleanArtist) }}, thumbnail: '{{ $track['thumbnail'] }}' } ], index: 0 }); open = false; $wire.set('query', '')"
                          @endif>
                          
                         <!-- Label moved to end of flex container -->

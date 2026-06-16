@@ -19,13 +19,15 @@
                 <div>
                     <h4 class="font-headline-md text-[16px] md:text-[18px] text-on-surface truncate group-hover:underline"
                         x-text="currentTrack.title"></h4>
-                    <p class="font-label-sm text-[12px] md:text-[14px] text-on-surface-variant truncate" x-text="currentTrack.artist"></p>
+                    <p class="font-label-sm text-[12px] md:text-[14px] text-on-surface-variant truncate"
+                        x-text="currentTrack.artist"></p>
                 </div>
             </template>
             <template x-if="!currentTrack">
                 <div>
                     <h4 class="font-headline-md text-[16px] md:text-[18px] text-on-surface truncate">Select a song</h4>
-                    <p class="font-label-sm text-[12px] md:text-[14px] text-on-surface-variant truncate">To start playing</p>
+                    <p class="font-label-sm text-[12px] md:text-[14px] text-on-surface-variant truncate">To start
+                        playing</p>
                 </div>
             </template>
         </div>
@@ -36,7 +38,8 @@
     </div>
 
     <!-- Center: Controls -->
-    <div class="flex flex-row md:flex-col items-center justify-end md:justify-center gap-2 md:gap-1 w-auto md:w-1/3 max-w-xl">
+    <div
+        class="flex flex-row md:flex-col items-center justify-end md:justify-center gap-2 md:gap-1 w-auto md:w-1/3 max-w-xl">
         <div class="flex items-center gap-2 md:gap-6">
             <button @click="toggleShuffle" :title="isShuffle ? 'Matikan Acak' : 'Nyalakan Acak'"
                 class="material-symbols-outlined hover:text-primary active:scale-95 transition-all text-xl hidden md:block"
@@ -49,7 +52,8 @@
             <button @click="togglePlay" :title="isPlaying ? 'Pause' : 'Play'"
                 class="sketchy-border w-10 h-10 md:w-12 md:h-12 rounded-full bg-primary-container hover:bg-inverse-primary flex items-center justify-center shadow-[2px_2px_0px_0px_rgba(28,27,27,1)] active:shadow-none active:translate-y-[2px] active:translate-x-[2px] transition-all group">
                 <template x-if="isLoading">
-                    <span class="material-symbols-outlined text-on-background text-2xl md:text-3xl animate-spin">sync</span>
+                    <span
+                        class="material-symbols-outlined text-on-background text-2xl md:text-3xl animate-spin">sync</span>
                 </template>
                 <template x-if="!isLoading && !isPlaying">
                     <span
@@ -65,8 +69,8 @@
 
             <button @click="nextTrack" title="Next"
                 class="material-symbols-outlined text-on-surface hover:text-primary active:scale-95 transition-all text-2xl md:text-3xl"
-                :class="{'opacity-50 cursor-not-allowed': (currentIndex >= queue.length - 1 || queue.length === 0) && repeatMode !== 1}"
-                :disabled="(currentIndex >= queue.length - 1 || queue.length === 0) && repeatMode !== 1">skip_next</button>
+                :class="{'opacity-50 cursor-not-allowed': (currentIndex >= queue.length - 1 || queue.length === 0) && repeatMode !== 1 && !(autoplayMode && recommendations.length > 0)}"
+                :disabled="(currentIndex >= queue.length - 1 || queue.length === 0) && repeatMode !== 1 && !(autoplayMode && recommendations.length > 0)">skip_next</button>
             <button @click="toggleRepeat"
                 :title="repeatMode === 0 ? 'Nyalakan Ulang' : (repeatMode === 1 ? 'Ulangi Satu Lagu' : 'Matikan Ulang')"
                 class="material-symbols-outlined hover:text-primary active:scale-95 transition-all text-xl hidden md:block"
@@ -97,6 +101,12 @@
                     :style="'width: ' + (volume * 100) + '%'"></div>
             </div>
         </div>
+        <button @click="autoplayMode = !autoplayMode; localStorage.setItem('autoplayMode', autoplayMode)" 
+            :title="autoplayMode ? 'Matikan Autoplay' : 'Aktifkan Autoplay'"
+            class="material-symbols-outlined hover:text-primary active:scale-95 transition-all text-xl"
+            :class="autoplayMode ? 'text-primary' : 'text-on-surface-variant'">
+            autoplay
+        </button>
         <button @click="expanded = !expanded" title="Expand View"
             class="material-symbols-outlined text-on-surface hover:text-primary active:scale-95 transition-all rotate-[90deg]">open_in_full</button>
     </div>
@@ -111,7 +121,8 @@
         <div x-show="expanded" x-transition:enter="transition ease-out duration-300"
             x-transition:enter-start="opacity-0 translate-y-full" x-transition:enter-end="opacity-100 translate-y-0"
             x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100 translate-y-0"
-            class="fixed inset-0 z-[100] bg-surface flex flex-col md:flex-row overflow-y-auto md:overflow-hidden" style="display: none;">
+            class="fixed inset-0 z-[100] bg-surface flex flex-col md:flex-row overflow-y-auto md:overflow-hidden"
+            style="display: none;">
 
             <button @click="expanded = false"
                 class="absolute top-6 left-6 p-2 rounded-full bg-surface border-[2px] border-text-main shadow-[2px_2px_0px_#111827] hover:-translate-y-1 hover:shadow-[4px_4px_0px_#49B6E5] text-text-main z-[110] transition-all">
@@ -135,8 +146,10 @@
                         <!-- Track Info & Favorite -->
                         <div class="flex items-center justify-between w-full mb-8">
                             <div class="min-w-0 flex-1">
-                                <h2 class="font-headline-xl text-[28px] leading-tight text-on-surface truncate group-hover:underline" x-text="currentTrack.title"></h2>
-                                <p class="font-label-sm text-[16px] text-on-surface-variant truncate mt-1" x-text="currentTrack.artist"></p>
+                                <h2 class="font-headline-xl text-[28px] leading-tight text-on-surface truncate group-hover:underline"
+                                    x-text="currentTrack.title"></h2>
+                                <p class="font-label-sm text-[16px] text-on-surface-variant truncate mt-1"
+                                    x-text="currentTrack.artist"></p>
                             </div>
                             <button @click="saveTrack" :title="isSaved ? 'Hapus dari Favorite' : 'Simpan ke Favorite'"
                                 class="material-symbols-outlined hover:text-primary transition-colors ml-4 text-4xl"
@@ -149,7 +162,8 @@
                             <span class="font-label-sm text-[12px] text-on-surface-variant w-10 text-right"
                                 x-text="formatTime(currentTime)">0:00</span>
                             <div class="h-3 flex-grow sketchy-border bg-surface-container-highest rounded-full cursor-pointer group relative"
-                                @click="seek" @mousemove="hoverProgress($event)" @mouseleave="hoverTime = ''" :title="hoverTime">
+                                @click="seek" @mousemove="hoverProgress($event)" @mouseleave="hoverTime = ''"
+                                :title="hoverTime">
                                 <div class="h-full bg-primary-container border-r-2 border-on-background relative rounded-l-full transition-all"
                                     :style="'width: ' + progress + '%'"></div>
                             </div>
@@ -170,27 +184,36 @@
                             <button @click="togglePlay" :title="isPlaying ? 'Pause' : 'Play'"
                                 class="sketchy-border w-20 h-20 rounded-full bg-primary-container hover:bg-inverse-primary flex items-center justify-center shadow-[4px_4px_0px_0px_rgba(28,27,27,1)] active:shadow-none active:translate-y-[4px] active:translate-x-[4px] transition-all group">
                                 <template x-if="isLoading">
-                                    <span class="material-symbols-outlined text-on-background text-5xl animate-spin">sync</span>
+                                    <span
+                                        class="material-symbols-outlined text-on-background text-5xl animate-spin">sync</span>
                                 </template>
                                 <template x-if="!isLoading && !isPlaying">
-                                    <span class="material-symbols-outlined text-on-background text-5xl group-hover:scale-110 transition-transform"
+                                    <span
+                                        class="material-symbols-outlined text-on-background text-5xl group-hover:scale-110 transition-transform"
                                         style="font-variation-settings: 'FILL' 1;">play_arrow</span>
                                 </template>
                                 <template x-if="!isLoading && isPlaying">
-                                    <span class="material-symbols-outlined text-on-background text-5xl group-hover:scale-110 transition-transform"
+                                    <span
+                                        class="material-symbols-outlined text-on-background text-5xl group-hover:scale-110 transition-transform"
                                         style="font-variation-settings: 'FILL' 1;">pause</span>
                                 </template>
                             </button>
 
                             <button @click="nextTrack" title="Next"
                                 class="material-symbols-outlined text-on-surface hover:text-primary active:scale-95 transition-all text-5xl"
-                                :class="{'opacity-50 cursor-not-allowed': (currentIndex >= queue.length - 1 || queue.length === 0) && repeatMode !== 1}"
-                                :disabled="(currentIndex >= queue.length - 1 || queue.length === 0) && repeatMode !== 1">skip_next</button>
+                                :class="{'opacity-50 cursor-not-allowed': (currentIndex >= queue.length - 1 || queue.length === 0) && repeatMode !== 1 && !(autoplayMode && recommendations.length > 0)}"
+                                :disabled="(currentIndex >= queue.length - 1 || queue.length === 0) && repeatMode !== 1 && !(autoplayMode && recommendations.length > 0)">skip_next</button>
                             <button @click="toggleRepeat"
                                 :title="repeatMode === 0 ? 'Nyalakan Ulang' : (repeatMode === 1 ? 'Ulangi Satu Lagu' : 'Matikan Ulang')"
                                 class="material-symbols-outlined hover:text-primary active:scale-95 transition-all text-3xl"
                                 :class="repeatMode > 0 ? 'text-primary' : 'text-on-surface-variant'"
                                 x-text="repeatMode === 2 ? 'repeat_one' : 'repeat'">repeat</button>
+                            <button @click="autoplayMode = !autoplayMode; localStorage.setItem('autoplayMode', autoplayMode)" 
+                                :title="autoplayMode ? 'Matikan Autoplay' : 'Aktifkan Autoplay'"
+                                class="material-symbols-outlined hover:text-primary active:scale-95 transition-all text-3xl"
+                                :class="autoplayMode ? 'text-primary' : 'text-on-surface-variant'">
+                                autoplay
+                            </button>
                         </div>
                     </div>
                 </template>
@@ -232,7 +255,8 @@
                                     <div
                                         class="absolute inset-0 bg-primary/40 flex items-center justify-center backdrop-blur-[2px]">
                                         <template x-if="isLoading">
-                                            <span class="material-symbols-outlined text-surface text-xl animate-spin">sync</span>
+                                            <span
+                                                class="material-symbols-outlined text-surface text-xl animate-spin">sync</span>
                                         </template>
                                         <template x-if="!isLoading">
                                             <div class="text-white flex items-end justify-center h-4 gap-[2px]">
@@ -250,11 +274,41 @@
                                     x-text="track.title"></h4>
                                 <p class="font-label-sm text-on-surface-variant truncate" x-text="track.artist"></p>
                             </div>
-                            <button @click.prevent.stop="@auth track.isSaved = !track.isSaved; $dispatch('saveTrackToLibrary', { track: track }) @else showLoginModal = true; @endauth"
+                            <button
+                                @click.prevent.stop="@auth track.isSaved = !track.isSaved; $dispatch('saveTrackToLibrary', { track: track }) @else showLoginModal = true; @endauth"
                                 :title="track.isSaved ? 'Hapus dari Favorite' : 'Simpan ke Favorite'"
                                 class="material-symbols-outlined hover:text-primary transition-colors ml-3 text-2xl"
                                 :class="track.isSaved ? 'text-primary' : 'text-outline-variant'"
                                 :style="`font-variation-settings: 'FILL' ${track.isSaved ? 1 : 0};`">favorite</button>
+                        </div>
+                    </template>
+
+                    <!-- Separator / Header for Recommendations -->
+                    <template x-if="recommendations.length > 0">
+                        <div class="pt-6 border-t-2 border-dashed border-outline-variant">
+                            <h4 class="font-headline-sm text-[16px] text-primary flex items-center gap-2 mb-4">
+                                <span class="material-symbols-outlined">autoplay</span>
+                                {{ __('Recommended Songs') }}
+                            </h4>
+                            <div class="space-y-4">
+                                <template x-for="(track, index) in recommendations" :key="'rec_' + index">
+                                    <div class="flex items-center p-3 rounded-xl cursor-pointer transition-all sketchy-border hover:bg-secondary-container/30 hover:rotate-[-1deg] bg-surface group"
+                                        @click="queue.push(track); currentIndex = queue.length - 1; playTrack(track)">
+                                        <div class="relative h-14 w-14 shrink-0 rounded-lg overflow-hidden border-2 border-on-background">
+                                            <img :src="track.thumbnail" class="object-cover w-full h-full group-hover:scale-110 transition duration-300">
+                                        </div>
+                                        <div class="ml-4 flex-1 min-w-0">
+                                            <h4 class="font-headline-md text-[16px] text-on-surface truncate group-hover:text-primary" x-text="track.title"></h4>
+                                            <p class="font-label-sm text-on-surface-variant truncate" x-text="track.artist"></p>
+                                        </div>
+                                        <button @click.prevent.stop="@auth track.isSaved = !track.isSaved; $dispatch('saveTrackToLibrary', { track: track }) @else showLoginModal = true; @endauth"
+                                            :title="track.isSaved ? 'Hapus dari Favorite' : 'Simpan ke Favorite'"
+                                            class="material-symbols-outlined hover:text-primary transition-colors ml-3 text-2xl text-outline-variant"
+                                            :class="track.isSaved ? 'text-primary' : 'text-outline-variant'"
+                                            :style="`font-variation-settings: 'FILL' ${track.isSaved ? 1 : 0};`">favorite</button>
+                                    </div>
+                                </template>
+                            </div>
                         </div>
                     </template>
                 </div>
@@ -263,14 +317,11 @@
     </template>
 
     <!-- Hidden HTML5 Audio Element -->
-    <audio x-ref="audioEl" @timeupdate="updateProgress" @ended="trackEnded" @loadedmetadata="setDuration"
-        @play="isPlaying = true" @pause="isPlaying = false; isLoading = false"
-        @playing="isPlaying = true; isLoading = false"
-        @waiting="isLoading = true"
-        @seeking="isLoading = true"
-        @seeked="isLoading = false"
-        @loadstart="isLoading = true"
-        @error="isLoading = false"></audio>
+    <audio x-ref="audioEl" x-on:timeupdate="updateProgress" x-on:ended="trackEnded" x-on:loadedmetadata="setDuration"
+        x-on:play="isPlaying = true" x-on:pause="isPlaying = false; isLoading = false"
+        x-on:playing="isPlaying = true; isLoading = false" x-on:waiting="isLoading = true"
+        x-on:seeking="isLoading = true" x-on:seeked="isLoading = false" x-on:loadstart="isLoading = true"
+        x-on:error="isLoading = false"></audio>
 
     <script>
         document.addEventListener('alpine:init', () => {
@@ -291,6 +342,8 @@
                 isShuffle: false,
                 repeatMode: 0, // 0: off, 1: all, 2: one
                 isLoading: false,
+                autoplayMode: localStorage.getItem('autoplayMode') !== 'false',
+                recommendations: [],
 
                 init() {
                     this.$refs.audioEl.volume = this.volume;
@@ -350,6 +403,11 @@
                         } else if (this.repeatMode === 1) {
                             this.currentIndex = 0;
                             this.playTrack(this.queue[this.currentIndex]);
+                        } else if (this.autoplayMode && this.recommendations.length > 0) {
+                            const nextRec = this.recommendations[0];
+                            this.queue.push(nextRec);
+                            this.currentIndex = this.queue.length - 1;
+                            this.playTrack(nextRec);
                         }
                     }
                 },
@@ -366,15 +424,34 @@
                     }
                 },
 
+                async fetchRecommendations(trackId) {
+                    try {
+                        const response = await fetch(`/api/track/${trackId}/recommendations`);
+                        const data = await response.json();
+                        if (data && data.length > 0) {
+                            // Filter out tracks already in the queue to avoid duplicates
+                            this.recommendations = data.filter(rec => !this.queue.some(q => q.id === rec.id));
+                        } else {
+                            this.recommendations = [];
+                        }
+                    } catch (e) {
+                        console.error('Error fetching recommendations:', e);
+                        this.recommendations = [];
+                    }
+                },
+
                 async playTrack(track) {
                     this.currentTrack = track;
                     const trackId = track.id || track.videoId;
                     this.isLoading = true;
+                    this.recommendations = [];
 
                     @this.call('recordHistory', trackId, track.title, track.artist, track.thumbnail);
                     this.isSaved = await this.$wire.checkIsSaved(trackId);
 
                     if (this.mockInterval) clearInterval(this.mockInterval);
+
+                    this.fetchRecommendations(trackId);
 
                     try {
                         const response = await fetch(`/api/track/${trackId}`);
@@ -482,6 +559,11 @@
                             this.nextTrack();
                         } else if (this.repeatMode === 1) { // repeat all
                             this.nextTrack(); // nextTrack already handles looping
+                        } else if (this.autoplayMode && this.recommendations.length > 0) {
+                            const nextRec = this.recommendations[0];
+                            this.queue.push(nextRec);
+                            this.currentIndex = this.queue.length - 1;
+                            this.playTrack(nextRec);
                         }
                     }
                 },
