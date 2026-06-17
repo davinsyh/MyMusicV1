@@ -248,42 +248,42 @@
                                  :class="autoplayMode ? 'text-primary' : 'text-on-surface-variant'">
                                  autoplay
                              </button>
-                             <!-- Volume Control Group (YouTube-like Hover) in Maximized View -->
-                             <div class="relative hidden md:flex items-center select-none h-9 w-9"
-                                  x-data="{ 
-                                      isHovered: false, 
-                                      hoverTimeout: null,
-                                      onMouseEnter() {
-                                          if (this.hoverTimeout) {
-                                              clearTimeout(this.hoverTimeout);
-                                              this.hoverTimeout = null;
-                                          }
-                                          this.isHovered = true;
-                                      },
-                                      onMouseLeave() {
-                                          if (this.hoverTimeout) clearTimeout(this.hoverTimeout);
-                                          this.hoverTimeout = setTimeout(() => {
-                                              this.isHovered = false;
+                              <!-- Volume Control Group (YouTube-like Hover - Vertical) in Maximized View -->
+                              <div class="relative hidden md:flex items-center select-none h-9 w-9"
+                                   x-data="{ 
+                                       isHovered: false, 
+                                       hoverTimeout: null,
+                                       onMouseEnter() {
+                                           if (this.hoverTimeout) {
+                                               clearTimeout(this.hoverTimeout);
+                                               this.hoverTimeout = null;
+                                           }
+                                           this.isHovered = true;
+                                       },
+                                       onMouseLeave() {
+                                           if (this.hoverTimeout) clearTimeout(this.hoverTimeout);
+                                           this.hoverTimeout = setTimeout(() => {
+                                               this.isHovered = false;
                                           }, 6000);
-                                      }
-                                  }"
-                                  @mouseenter="onMouseEnter()"
-                                  @mouseleave="onMouseLeave()">
-                                 <button @click="toggleMute"
-                                     class="material-symbols-outlined text-on-surface hover:text-primary active:scale-95 transition-all text-3xl focus:outline-none shrink-0 w-9 h-9 flex items-center justify-center"
-                                     x-text="volume === 0 ? 'volume_off' : (volume < 0.5 ? 'volume_down' : 'volume_up')">
-                                 </button>
-                                 <div class="absolute right-full mr-2 top-1/2 -translate-y-1/2 overflow-hidden transition-all duration-300 ease-in-out flex items-center h-9"
-                                      :style="isHovered ? 'width: 90px; opacity: 1; pointer-events: auto;' : 'width: 0px; opacity: 0; pointer-events: none;'">
-                                     <div class="h-2 w-[82px] sketchy-border bg-surface-container-highest rounded-full cursor-pointer relative shrink-0"
-                                         @mousedown="startVolumeDrag($event)"
-                                         @touchstart="startVolumeDrag($event.touches[0])">
-                                         <div class="h-full bg-primary-container border-r-2 border-on-background"
-                                             :class="{'transition-all': !isDraggingVolume}"
-                                             :style="'width: ' + (volume * 100) + '%'"></div>
-                                     </div>
-                                 </div>
-                             </div>
+                                       }
+                                   }"
+                                   @mouseenter="onMouseEnter()"
+                                   @mouseleave="onMouseLeave()">
+                                  <button @click="toggleMute"
+                                      class="material-symbols-outlined text-on-surface hover:text-primary active:scale-95 transition-all text-3xl focus:outline-none shrink-0 w-9 h-9 flex items-center justify-center"
+                                      x-text="volume === 0 ? 'volume_off' : (volume < 0.5 ? 'volume_down' : 'volume_up')">
+                                  </button>
+                                  <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 overflow-hidden transition-all duration-300 ease-in-out flex items-center justify-center w-8"
+                                       :style="isHovered ? 'height: 98px; opacity: 1; pointer-events: auto;' : 'height: 0px; opacity: 0; pointer-events: none;'">
+                                      <div class="w-2 h-[82px] sketchy-border bg-surface-container-highest rounded-full cursor-pointer relative shrink-0"
+                                          @mousedown="startVolumeDragVertical($event)"
+                                          @touchstart="startVolumeDragVertical($event.touches[0])">
+                                          <div class="w-full bg-primary-container border-t-2 border-on-background absolute bottom-0 left-0 right-0 rounded-b-full"
+                                              :class="{'transition-all': !isDraggingVolume}"
+                                              :style="'height: ' + (volume * 100) + '%'"></div>
+                                      </div>
+                                  </div>
+                              </div>
                         </div>
                     </div>
                 </template>
@@ -733,6 +733,50 @@
                     if (!this.activeVolumeContainer) return;
                     const rect = this.activeVolumeContainer.getBoundingClientRect();
                     const percent = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+                    this.volume = percent;
+                    this.$refs.audioEl.volume = percent;
+                    if (this.volume > 0) {
+                        this.lastVolume = this.volume;
+                    }
+                    localStorage.setItem('playerVolume', this.volume);
+                },
+
+                startVolumeDragVertical(e) {
+                    this.isDraggingVolume = true;
+                    this.activeVolumeContainer = e.currentTarget;
+                    this.updateVolumeFromEventVertical(e);
+                    
+                    const onMouseMove = (moveEvent) => {
+                        if (this.isDraggingVolume && this.activeVolumeContainer) {
+                            this.updateVolumeFromEventVertical(moveEvent);
+                        }
+                    };
+                    
+                    const onMouseUp = () => {
+                        this.isDraggingVolume = false;
+                        this.activeVolumeContainer = null;
+                        document.removeEventListener('mousemove', onMouseMove);
+                        document.removeEventListener('mouseup', onMouseUp);
+                        document.removeEventListener('touchmove', onTouchMove);
+                        document.removeEventListener('touchend', onMouseUp);
+                    };
+                    
+                    const onTouchMove = (touchEvent) => {
+                        if (this.isDraggingVolume && this.activeVolumeContainer) {
+                            this.updateVolumeFromEventVertical(touchEvent.touches[0]);
+                        }
+                    };
+
+                    document.addEventListener('mousemove', onMouseMove);
+                    document.addEventListener('mouseup', onMouseUp);
+                    document.addEventListener('touchmove', onTouchMove, { passive: true });
+                    document.addEventListener('touchend', onMouseUp);
+                },
+
+                updateVolumeFromEventVertical(e) {
+                    if (!this.activeVolumeContainer) return;
+                    const rect = this.activeVolumeContainer.getBoundingClientRect();
+                    const percent = Math.max(0, Math.min(1, 1 - (e.clientY - rect.top) / rect.height));
                     this.volume = percent;
                     this.$refs.audioEl.volume = percent;
                     if (this.volume > 0) {
