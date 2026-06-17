@@ -82,8 +82,10 @@
             <span class="font-label-sm text-[10px] text-on-surface-variant w-8 text-right"
                 x-text="formatTime(currentTime)">0:00</span>
             <div class="h-2 flex-grow sketchy-border bg-surface-container-highest rounded-full cursor-pointer group relative"
-                @click="seek" @mousemove="hoverProgress($event)" @mouseleave="hoverTime = ''" :title="hoverTime">
-                <div class="h-full bg-primary-container border-r-2 border-on-background relative rounded-l-full transition-all"
+                @mousedown="startSeekDrag($event)" @touchstart="startSeekDrag($event.touches[0])"
+                @mousemove="hoverProgress($event)" @mouseleave="hoverTime = ''" :title="hoverTime">
+                <div class="h-full bg-primary-container border-r-2 border-on-background relative rounded-l-full"
+                    :class="{'transition-all': !isDraggingSeek}"
                     :style="'width: ' + progress + '%'"></div>
             </div>
             <span class="font-label-sm text-[10px] text-on-surface-variant w-8"
@@ -93,13 +95,25 @@
 
     <!-- Right: Extra Controls -->
     <div class="hidden md:flex items-center justify-end gap-4 w-1/3 min-w-0">
-        <div class="flex items-center gap-2 w-32 group hidden sm:flex">
-            <button
-                class="material-symbols-outlined text-on-surface-variant group-hover:text-primary transition-colors text-xl">volume_up</button>
-            <div class="h-2 flex-grow sketchy-border bg-surface-container-highest rounded-full overflow-hidden cursor-pointer"
-                @click="setVolume">
-                <div class="h-full bg-primary-container border-r-2 border-on-background transition-all"
-                    :style="'width: ' + (volume * 100) + '%'"></div>
+        <!-- Volume Control Group (YouTube-like Hover) -->
+        <div class="flex items-center transition-all duration-300 ease-in-out select-none hidden sm:flex"
+             x-data="{ isHovered: false }"
+             @mouseenter="isHovered = true"
+             @mouseleave="isHovered = false"
+             :style="isHovered ? 'width: 140px;' : 'width: 32px;'">
+            <button @click="toggleMute"
+                class="material-symbols-outlined text-on-surface-variant hover:text-primary transition-colors text-xl focus:outline-none shrink-0"
+                x-text="volume === 0 ? 'volume_off' : (volume < 0.5 ? 'volume_down' : 'volume_up')">
+            </button>
+            <div class="overflow-hidden transition-all duration-300 ease-in-out flex items-center"
+                 :style="isHovered ? 'width: 90px; opacity: 1; pointer-events: auto; margin-left: 8px;' : 'width: 0px; opacity: 0; pointer-events: none; margin-left: 0;'">
+                <div class="h-2 w-[82px] sketchy-border bg-surface-container-highest rounded-full cursor-pointer relative shrink-0"
+                    @mousedown="startVolumeDrag($event)"
+                    @touchstart="startVolumeDrag($event.touches[0])">
+                    <div class="h-full bg-primary-container border-r-2 border-on-background"
+                        :class="{'transition-all': !isDraggingVolume}"
+                        :style="'width: ' + (volume * 100) + '%'"></div>
+                </div>
             </div>
         </div>
         <button @click="autoplayMode = !autoplayMode; localStorage.setItem('autoplayMode', autoplayMode)" 
@@ -113,8 +127,9 @@
     </div>
 
     <!-- Mobile Thin Progress Bar -->
-    <div class="absolute bottom-0 left-0 right-0 h-1 bg-surface-container-highest md:hidden" @click="seek">
-        <div class="h-full bg-primary transition-all" :style="'width: ' + progress + '%'"></div>
+    <div class="absolute bottom-0 left-0 right-0 h-1 bg-surface-container-highest md:hidden"
+        @mousedown="startSeekDrag($event)" @touchstart="startSeekDrag($event.touches[0])">
+        <div class="h-full bg-primary" :class="{'transition-all': !isDraggingSeek}" :style="'width: ' + progress + '%'"></div>
     </div>
 
     <!-- Maximized Overlay (Watch View) -->
@@ -163,9 +178,11 @@
                             <span class="font-label-sm text-[12px] text-on-surface-variant w-10 text-right"
                                 x-text="formatTime(currentTime)">0:00</span>
                             <div class="h-3 flex-grow sketchy-border bg-surface-container-highest rounded-full cursor-pointer group relative"
-                                @click="seek" @mousemove="hoverProgress($event)" @mouseleave="hoverTime = ''"
+                                @mousedown="startSeekDrag($event)" @touchstart="startSeekDrag($event.touches[0])"
+                                @mousemove="hoverProgress($event)" @mouseleave="hoverTime = ''"
                                 :title="hoverTime">
-                                <div class="h-full bg-primary-container border-r-2 border-on-background relative rounded-l-full transition-all"
+                                <div class="h-full bg-primary-container border-r-2 border-on-background relative rounded-l-full"
+                                    :class="{'transition-all': !isDraggingSeek}"
                                     :style="'width: ' + progress + '%'"></div>
                             </div>
                             <span class="font-label-sm text-[12px] text-on-surface-variant w-10"
@@ -339,6 +356,11 @@
                 duration: 0,
                 progress: 0,
                 volume: 1,
+                lastVolume: 1,
+                isDraggingSeek: false,
+                isDraggingVolume: false,
+                activeSeekContainer: null,
+                activeVolumeContainer: null,
                 isSaved: false,
                 hoverTime: '',
                 isShuffle: false,
@@ -348,6 +370,11 @@
                 recommendations: [],
 
                 init() {
+                    const savedVolume = localStorage.getItem('playerVolume');
+                    if (savedVolume !== null) {
+                        this.volume = parseFloat(savedVolume);
+                        this.lastVolume = this.volume > 0 ? this.volume : 1;
+                    }
                     this.$refs.audioEl.volume = this.volume;
                     window.addEventListener('play-queue', (e) => {
                         this.playQueue(e.detail);
@@ -556,8 +583,47 @@
                 },
 
                 seek(e) {
+                    this.activeSeekContainer = e.currentTarget;
+                    this.updateSeekFromEvent(e);
+                    this.activeSeekContainer = null;
+                },
+
+                startSeekDrag(e) {
                     if (!this.currentTrack) return;
-                    const rect = e.currentTarget.getBoundingClientRect();
+                    this.isDraggingSeek = true;
+                    this.activeSeekContainer = e.currentTarget;
+                    this.updateSeekFromEvent(e);
+                    
+                    const onMouseMove = (moveEvent) => {
+                        if (this.isDraggingSeek && this.activeSeekContainer) {
+                            this.updateSeekFromEvent(moveEvent);
+                        }
+                    };
+                    
+                    const onMouseUp = () => {
+                        this.isDraggingSeek = false;
+                        this.activeSeekContainer = null;
+                        document.removeEventListener('mousemove', onMouseMove);
+                        document.removeEventListener('mouseup', onMouseUp);
+                        document.removeEventListener('touchmove', onTouchMove);
+                        document.removeEventListener('touchend', onMouseUp);
+                    };
+                    
+                    const onTouchMove = (touchEvent) => {
+                        if (this.isDraggingSeek && this.activeSeekContainer) {
+                            this.updateSeekFromEvent(touchEvent.touches[0]);
+                        }
+                    };
+
+                    document.addEventListener('mousemove', onMouseMove);
+                    document.addEventListener('mouseup', onMouseUp);
+                    document.addEventListener('touchmove', onTouchMove, { passive: true });
+                    document.addEventListener('touchend', onMouseUp);
+                },
+
+                updateSeekFromEvent(e) {
+                    if (!this.activeSeekContainer || !this.duration) return;
+                    const rect = this.activeSeekContainer.getBoundingClientRect();
                     const percent = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
                     this.currentTime = this.duration * percent;
                     this.progress = percent * 100;
@@ -575,10 +641,64 @@
                 },
 
                 setVolume(e) {
-                    const rect = e.currentTarget.getBoundingClientRect();
+                    this.activeVolumeContainer = e.currentTarget;
+                    this.updateVolumeFromEvent(e);
+                    this.activeVolumeContainer = null;
+                },
+
+                startVolumeDrag(e) {
+                    this.isDraggingVolume = true;
+                    this.activeVolumeContainer = e.currentTarget;
+                    this.updateVolumeFromEvent(e);
+                    
+                    const onMouseMove = (moveEvent) => {
+                        if (this.isDraggingVolume && this.activeVolumeContainer) {
+                            this.updateVolumeFromEvent(moveEvent);
+                        }
+                    };
+                    
+                    const onMouseUp = () => {
+                        this.isDraggingVolume = false;
+                        this.activeVolumeContainer = null;
+                        document.removeEventListener('mousemove', onMouseMove);
+                        document.removeEventListener('mouseup', onMouseUp);
+                        document.removeEventListener('touchmove', onTouchMove);
+                        document.removeEventListener('touchend', onMouseUp);
+                    };
+                    
+                    const onTouchMove = (touchEvent) => {
+                        if (this.isDraggingVolume && this.activeVolumeContainer) {
+                            this.updateVolumeFromEvent(touchEvent.touches[0]);
+                        }
+                    };
+
+                    document.addEventListener('mousemove', onMouseMove);
+                    document.addEventListener('mouseup', onMouseUp);
+                    document.addEventListener('touchmove', onTouchMove, { passive: true });
+                    document.addEventListener('touchend', onMouseUp);
+                },
+
+                updateVolumeFromEvent(e) {
+                    if (!this.activeVolumeContainer) return;
+                    const rect = this.activeVolumeContainer.getBoundingClientRect();
                     const percent = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
                     this.volume = percent;
                     this.$refs.audioEl.volume = percent;
+                    if (this.volume > 0) {
+                        this.lastVolume = this.volume;
+                    }
+                    localStorage.setItem('playerVolume', this.volume);
+                },
+
+                toggleMute() {
+                    if (this.volume > 0) {
+                        this.lastVolume = this.volume;
+                        this.volume = 0;
+                    } else {
+                        this.volume = this.lastVolume || 1;
+                    }
+                    this.$refs.audioEl.volume = this.volume;
+                    localStorage.setItem('playerVolume', this.volume);
                 },
 
                 formatTime(seconds) {
