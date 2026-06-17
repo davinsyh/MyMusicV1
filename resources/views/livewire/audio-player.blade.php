@@ -97,9 +97,25 @@
     <div class="hidden md:flex items-center justify-end gap-4 w-1/3 min-w-0">
         <!-- Volume Control Group (YouTube-like Hover) -->
         <div class="relative flex items-center select-none hidden sm:flex h-8 w-8"
-             x-data="{ isHovered: false }"
-             @mouseenter="isHovered = true"
-             @mouseleave="isHovered = false">
+             x-data="{ 
+                 isHovered: false, 
+                 hoverTimeout: null,
+                 onMouseEnter() {
+                     if (this.hoverTimeout) {
+                         clearTimeout(this.hoverTimeout);
+                         this.hoverTimeout = null;
+                     }
+                     this.isHovered = true;
+                 },
+                 onMouseLeave() {
+                     if (this.hoverTimeout) clearTimeout(this.hoverTimeout);
+                     this.hoverTimeout = setTimeout(() => {
+                         this.isHovered = false;
+                     }, 6000);
+                 }
+             }"
+             @mouseenter="onMouseEnter()"
+             @mouseleave="onMouseLeave()">
             <button @click="toggleMute"
                 class="material-symbols-outlined text-on-surface-variant hover:text-primary transition-colors text-xl focus:outline-none shrink-0 w-8 h-8 flex items-center justify-center"
                 x-text="volume === 0 ? 'volume_off' : (volume < 0.5 ? 'volume_down' : 'volume_up')">
@@ -234,9 +250,25 @@
                              </button>
                              <!-- Volume Control Group (YouTube-like Hover) in Maximized View -->
                              <div class="relative hidden md:flex items-center select-none h-9 w-9"
-                                  x-data="{ isHovered: false }"
-                                  @mouseenter="isHovered = true"
-                                  @mouseleave="isHovered = false">
+                                  x-data="{ 
+                                      isHovered: false, 
+                                      hoverTimeout: null,
+                                      onMouseEnter() {
+                                          if (this.hoverTimeout) {
+                                              clearTimeout(this.hoverTimeout);
+                                              this.hoverTimeout = null;
+                                          }
+                                          this.isHovered = true;
+                                      },
+                                      onMouseLeave() {
+                                          if (this.hoverTimeout) clearTimeout(this.hoverTimeout);
+                                          this.hoverTimeout = setTimeout(() => {
+                                              this.isHovered = false;
+                                          }, 6000);
+                                      }
+                                  }"
+                                  @mouseenter="onMouseEnter()"
+                                  @mouseleave="onMouseLeave()">
                                  <button @click="toggleMute"
                                      class="material-symbols-outlined text-on-surface hover:text-primary active:scale-95 transition-all text-3xl focus:outline-none shrink-0 w-9 h-9 flex items-center justify-center"
                                      x-text="volume === 0 ? 'volume_off' : (volume < 0.5 ? 'volume_down' : 'volume_up')">
