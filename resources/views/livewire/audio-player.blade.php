@@ -96,17 +96,16 @@
     <!-- Right: Extra Controls -->
     <div class="hidden md:flex items-center justify-end gap-4 w-1/3 min-w-0">
         <!-- Volume Control Group (YouTube-like Hover) -->
-        <div class="flex items-center transition-all duration-300 ease-in-out select-none hidden sm:flex"
+        <div class="relative flex items-center select-none hidden sm:flex h-8 w-8"
              x-data="{ isHovered: false }"
              @mouseenter="isHovered = true"
-             @mouseleave="isHovered = false"
-             :style="isHovered ? 'width: 140px;' : 'width: 32px;'">
+             @mouseleave="isHovered = false">
             <button @click="toggleMute"
-                class="material-symbols-outlined text-on-surface-variant hover:text-primary transition-colors text-xl focus:outline-none shrink-0"
+                class="material-symbols-outlined text-on-surface-variant hover:text-primary transition-colors text-xl focus:outline-none shrink-0 w-8 h-8 flex items-center justify-center"
                 x-text="volume === 0 ? 'volume_off' : (volume < 0.5 ? 'volume_down' : 'volume_up')">
             </button>
-            <div class="overflow-hidden transition-all duration-300 ease-in-out flex items-center"
-                 :style="isHovered ? 'width: 90px; opacity: 1; pointer-events: auto; margin-left: 8px;' : 'width: 0px; opacity: 0; pointer-events: none; margin-left: 0;'">
+            <div class="absolute right-full mr-2 top-1/2 -translate-y-1/2 overflow-hidden transition-all duration-300 ease-in-out flex items-center h-8"
+                 :style="isHovered ? 'width: 90px; opacity: 1; pointer-events: auto;' : 'width: 0px; opacity: 0; pointer-events: none;'">
                 <div class="h-2 w-[82px] sketchy-border bg-surface-container-highest rounded-full cursor-pointer relative shrink-0"
                     @mousedown="startVolumeDrag($event)"
                     @touchstart="startVolumeDrag($event.touches[0])">
@@ -234,17 +233,16 @@
                                  autoplay
                              </button>
                              <!-- Volume Control Group (YouTube-like Hover) in Maximized View -->
-                             <div class="hidden md:flex items-center transition-all duration-300 ease-in-out select-none"
+                             <div class="relative hidden md:flex items-center select-none h-9 w-9"
                                   x-data="{ isHovered: false }"
                                   @mouseenter="isHovered = true"
-                                  @mouseleave="isHovered = false"
-                                  :style="isHovered ? 'width: 140px;' : 'width: 36px;'">
+                                  @mouseleave="isHovered = false">
                                  <button @click="toggleMute"
-                                     class="material-symbols-outlined text-on-surface hover:text-primary active:scale-95 transition-all text-3xl focus:outline-none shrink-0"
+                                     class="material-symbols-outlined text-on-surface hover:text-primary active:scale-95 transition-all text-3xl focus:outline-none shrink-0 w-9 h-9 flex items-center justify-center"
                                      x-text="volume === 0 ? 'volume_off' : (volume < 0.5 ? 'volume_down' : 'volume_up')">
                                  </button>
-                                 <div class="overflow-hidden transition-all duration-300 ease-in-out flex items-center"
-                                      :style="isHovered ? 'width: 90px; opacity: 1; pointer-events: auto; margin-left: 8px;' : 'width: 0px; opacity: 0; pointer-events: none; margin-left: 0;'">
+                                 <div class="absolute left-full ml-2 top-1/2 -translate-y-1/2 overflow-hidden transition-all duration-300 ease-in-out flex items-center h-9"
+                                      :style="isHovered ? 'width: 90px; opacity: 1; pointer-events: auto;' : 'width: 0px; opacity: 0; pointer-events: none;'">
                                      <div class="h-2 w-[82px] sketchy-border bg-surface-container-highest rounded-full cursor-pointer relative shrink-0"
                                          @mousedown="startVolumeDrag($event)"
                                          @touchstart="startVolumeDrag($event.touches[0])">
