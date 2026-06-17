@@ -120,7 +120,7 @@
                 class="material-symbols-outlined text-on-surface-variant hover:text-primary transition-colors text-xl focus:outline-none shrink-0 w-8 h-8 flex items-center justify-center"
                 x-text="volume === 0 ? 'volume_off' : (volume < 0.5 ? 'volume_down' : 'volume_up')">
             </button>
-            <div class="absolute right-full mr-2 top-1/2 -translate-y-1/2 overflow-hidden transition-all duration-300 ease-in-out flex items-center h-8"
+            <div class="absolute left-full ml-2 top-1/2 -translate-y-1/2 overflow-hidden transition-all duration-300 ease-in-out flex items-center h-8"
                  :style="isHovered ? 'width: 90px; opacity: 1; pointer-events: auto;' : 'width: 0px; opacity: 0; pointer-events: none;'">
                 <div class="h-2 w-[82px] sketchy-border bg-surface-container-highest rounded-full cursor-pointer relative shrink-0"
                     @mousedown="startVolumeDrag($event)"
