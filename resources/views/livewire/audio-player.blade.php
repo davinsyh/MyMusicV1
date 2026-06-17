@@ -122,11 +122,6 @@
             :class="autoplayMode ? 'text-primary' : 'text-on-surface-variant'">
             autoplay
         </button>
-        <button @click="expanded = !expanded" title="Up Next"
-            class="material-symbols-outlined hover:text-primary active:scale-95 transition-all text-xl"
-            :class="expanded ? 'text-primary' : 'text-on-surface-variant'">
-            queue_music
-        </button>
         <button @click="expanded = !expanded" title="Expand View"
             class="material-symbols-outlined text-on-surface hover:text-primary active:scale-95 transition-all rotate-[90deg]">open_in_full</button>
     </div>
@@ -232,12 +227,33 @@
                                 class="material-symbols-outlined hover:text-primary active:scale-95 transition-all text-3xl"
                                 :class="repeatMode > 0 ? 'text-primary' : 'text-on-surface-variant'"
                                 x-text="repeatMode === 2 ? 'repeat_one' : 'repeat'">repeat</button>
-                            <button @click="autoplayMode = !autoplayMode; localStorage.setItem('autoplayMode', autoplayMode)" 
-                                :title="autoplayMode ? 'Matikan Autoplay' : 'Aktifkan Autoplay'"
-                                class="material-symbols-outlined hover:text-primary active:scale-95 transition-all text-3xl"
-                                :class="autoplayMode ? 'text-primary' : 'text-on-surface-variant'">
-                                autoplay
-                            </button>
+                             <button @click="autoplayMode = !autoplayMode; localStorage.setItem('autoplayMode', autoplayMode)" 
+                                 :title="autoplayMode ? 'Matikan Autoplay' : 'Aktifkan Autoplay'"
+                                 class="material-symbols-outlined hover:text-primary active:scale-95 transition-all text-3xl"
+                                 :class="autoplayMode ? 'text-primary' : 'text-on-surface-variant'">
+                                 autoplay
+                             </button>
+                             <!-- Volume Control Group (YouTube-like Hover) in Maximized View -->
+                             <div class="hidden md:flex items-center transition-all duration-300 ease-in-out select-none"
+                                  x-data="{ isHovered: false }"
+                                  @mouseenter="isHovered = true"
+                                  @mouseleave="isHovered = false"
+                                  :style="isHovered ? 'width: 140px;' : 'width: 36px;'">
+                                 <button @click="toggleMute"
+                                     class="material-symbols-outlined text-on-surface hover:text-primary active:scale-95 transition-all text-3xl focus:outline-none shrink-0"
+                                     x-text="volume === 0 ? 'volume_off' : (volume < 0.5 ? 'volume_down' : 'volume_up')">
+                                 </button>
+                                 <div class="overflow-hidden transition-all duration-300 ease-in-out flex items-center"
+                                      :style="isHovered ? 'width: 90px; opacity: 1; pointer-events: auto; margin-left: 8px;' : 'width: 0px; opacity: 0; pointer-events: none; margin-left: 0;'">
+                                     <div class="h-2 w-[82px] sketchy-border bg-surface-container-highest rounded-full cursor-pointer relative shrink-0"
+                                         @mousedown="startVolumeDrag($event)"
+                                         @touchstart="startVolumeDrag($event.touches[0])">
+                                         <div class="h-full bg-primary-container border-r-2 border-on-background"
+                                             :class="{'transition-all': !isDraggingVolume}"
+                                             :style="'width: ' + (volume * 100) + '%'"></div>
+                                     </div>
+                                 </div>
+                             </div>
                         </div>
                     </div>
                 </template>
