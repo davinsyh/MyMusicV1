@@ -205,7 +205,7 @@
                         </div>
 
                         <!-- Playback Controls -->
-                        <div class="flex items-center justify-center gap-8 w-full">
+                        <div class="flex items-center justify-center gap-3 sm:gap-4 md:gap-4 lg:gap-8 w-full">
                             <button @click="toggleShuffle" :title="isShuffle ? 'Matikan Acak' : 'Nyalakan Acak'"
                                 class="material-symbols-outlined hover:text-primary active:scale-95 transition-all text-3xl"
                                 :class="{'text-primary': isShuffle && queue.length > 1, 'text-on-surface-variant': !isShuffle || queue.length <= 1, 'opacity-50 cursor-not-allowed': queue.length <= 1}"
@@ -248,7 +248,7 @@
                                  :class="autoplayMode ? 'text-primary' : 'text-on-surface-variant'">
                                  autoplay
                              </button>
-                              <!-- Volume Control Group (YouTube-like Hover - Vertical) in Maximized View -->
+                              <!-- Volume Control Group (YouTube-like Hover) in Maximized View -->
                               <div class="relative hidden md:flex items-center select-none h-9 w-9"
                                    x-data="{ 
                                        isHovered: false, 
@@ -273,14 +273,14 @@
                                       class="material-symbols-outlined text-on-surface hover:text-primary active:scale-95 transition-all text-3xl focus:outline-none shrink-0 w-9 h-9 flex items-center justify-center"
                                       x-text="volume === 0 ? 'volume_off' : (volume < 0.5 ? 'volume_down' : 'volume_up')">
                                   </button>
-                                  <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 overflow-hidden transition-all duration-300 ease-in-out flex items-center justify-center w-8"
-                                       :style="isHovered ? 'height: 98px; opacity: 1; pointer-events: auto;' : 'height: 0px; opacity: 0; pointer-events: none;'">
-                                      <div class="w-2 h-[82px] sketchy-border bg-surface-container-highest rounded-full cursor-pointer relative shrink-0"
-                                          @mousedown="startVolumeDragVertical($event)"
-                                          @touchstart="startVolumeDragVertical($event.touches[0])">
-                                          <div class="w-full bg-primary-container border-t-2 border-on-background absolute bottom-0 left-0 right-0 rounded-b-full"
+                                  <div class="absolute left-full ml-2 top-1/2 -translate-y-1/2 overflow-hidden transition-all duration-300 ease-in-out flex items-center h-9"
+                                       :style="isHovered ? 'width: 90px; opacity: 1; pointer-events: auto;' : 'width: 0px; opacity: 0; pointer-events: none;'">
+                                      <div class="h-2 w-[82px] sketchy-border bg-surface-container-highest rounded-full cursor-pointer relative shrink-0"
+                                          @mousedown="startVolumeDrag($event)"
+                                          @touchstart="startVolumeDrag($event.touches[0])">
+                                          <div class="h-full bg-primary-container border-r-2 border-on-background"
                                               :class="{'transition-all': !isDraggingVolume}"
-                                              :style="'height: ' + (volume * 100) + '%'"></div>
+                                              :style="'width: ' + (volume * 100) + '%'"></div>
                                       </div>
                                   </div>
                               </div>
