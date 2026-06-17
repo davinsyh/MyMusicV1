@@ -122,6 +122,11 @@
             :class="autoplayMode ? 'text-primary' : 'text-on-surface-variant'">
             autoplay
         </button>
+        <button @click="expanded = !expanded" title="Up Next"
+            class="material-symbols-outlined hover:text-primary active:scale-95 transition-all text-xl"
+            :class="expanded ? 'text-primary' : 'text-on-surface-variant'">
+            queue_music
+        </button>
         <button @click="expanded = !expanded" title="Expand View"
             class="material-symbols-outlined text-on-surface hover:text-primary active:scale-95 transition-all rotate-[90deg]">open_in_full</button>
     </div>
