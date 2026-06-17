@@ -330,37 +330,46 @@ class MusicService
     {
         $cacheKey = 'jamendo:track:' . $id;
 
-        return Cache::remember($cacheKey, now()->addMinutes(60), function () use ($id) {
-            try {
-                $response = Http::timeout(10)->get($this->baseUrl . '/tracks/', [
-                    'client_id' => $this->clientId,
-                    'format' => 'json',
-                    'id' => $id,
-                ]);
+        $cached = Cache::get($cacheKey);
+        if ($cached !== null) {
+            return $cached;
+        }
 
-                if ($response->successful()) {
-                    $results = $response->json('results') ?? [];
-                    if (empty($results)) {
-                        return null;
-                    }
-                    $track = $results[0];
+        try {
+            $response = Http::timeout(10)->get($this->baseUrl . '/tracks/', [
+                'client_id' => $this->clientId,
+                'format' => 'json',
+                'id' => $id,
+            ]);
 
-                    return [
-                        'id' => $track['id'],
-                        'title' => $track['name'] ?? 'Unknown',
-                        'author' => $track['artist_name'] ?? 'Unknown',
-                        'thumbnail' => $track['image'] ?? $track['album_image'] ?? '',
-                        'stream_url' => $track['audio'] ?? '',
-                    ];
+            if ($response->successful()) {
+                $results = $response->json('results') ?? [];
+                if (empty($results)) {
+                    return null;
+                }
+                $track = $results[0];
+
+                $data = [
+                    'id' => $track['id'],
+                    'title' => $track['name'] ?? 'Unknown',
+                    'author' => $track['artist_name'] ?? 'Unknown',
+                    'thumbnail' => $track['image'] ?? $track['album_image'] ?? '',
+                    'stream_url' => $track['audio'] ?? '',
+                ];
+
+                if (!empty($data['stream_url'])) {
+                    Cache::put($cacheKey, $data, now()->addMinutes(60));
                 }
 
-                Log::error('Jamendo API Track Error: ' . $response->body());
-                return null;
-            } catch (\Exception $e) {
-                Log::error('Jamendo API Connection Error: ' . $e->getMessage());
-                return null;
+                return $data;
             }
-        });
+
+            Log::error('Jamendo API Track Error: ' . $response->body());
+            return null;
+        } catch (\Exception $e) {
+            Log::error('Jamendo API Connection Error: ' . $e->getMessage());
+            return null;
+        }
     }
 
     /**
@@ -437,75 +446,84 @@ class MusicService
     {
         $cacheKey = 'jamendo:recommendations:' . $trackId;
 
-        return Cache::remember($cacheKey, now()->addMinutes(60), function () use ($trackId) {
-            try {
-                // 1. Fetch current track details including musicinfo for tags
-                $response = Http::timeout(10)->get($this->baseUrl . '/tracks/', [
-                    'client_id' => $this->clientId,
-                    'format' => 'json',
-                    'id' => $trackId,
-                    'include' => 'musicinfo',
-                ]);
+        $cached = Cache::get($cacheKey);
+        if ($cached !== null) {
+            return $cached;
+        }
 
-                if (!$response->successful()) {
-                    return [];
-                }
+        try {
+            // 1. Fetch current track details including musicinfo for tags
+            $response = Http::timeout(10)->get($this->baseUrl . '/tracks/', [
+                'client_id' => $this->clientId,
+                'format' => 'json',
+                'id' => $trackId,
+                'include' => 'musicinfo',
+            ]);
 
-                $results = $response->json('results') ?? [];
-                if (empty($results)) {
-                    return [];
-                }
-
-                $track = $results[0];
-                $artistId = $track['artist_id'] ?? null;
-                
-                // Get genres from musicinfo
-                $genres = $track['musicinfo']['tags']['genres'] ?? [];
-                
-                $params = [
-                    'client_id' => $this->clientId,
-                    'format' => 'json',
-                    'limit' => 10,
-                    'order' => 'popularity_total',
-                    'imagesize' => '200',
-                ];
-
-                // If genres are available, use fuzzytags for recommendations
-                if (!empty($genres)) {
-                    $params['fuzzytags'] = implode(' ', array_slice($genres, 0, 2));
-                } elseif ($artistId) {
-                    $params['artist_id'] = $artistId;
-                } else {
-                    $params['order'] = 'popularity_total';
-                }
-
-                $recResponse = Http::timeout(10)->get($this->baseUrl . '/tracks/', $params);
-
-                if ($recResponse->successful()) {
-                    $recResults = $recResponse->json('results') ?? [];
-                    
-                    // Exclude the current track
-                    $filtered = array_filter($recResults, function ($t) use ($trackId) {
-                        return $t['id'] !== $trackId;
-                    });
-
-                    return array_map(function ($t) {
-                        return [
-                            'id' => $t['id'],
-                            'type' => 'video',
-                            'title' => $t['name'] ?? 'Unknown',
-                            'artist' => $t['artist_name'] ?? 'Unknown Artist',
-                            'thumbnail' => $t['image'] ?? $t['album_image'] ?? '',
-                            'duration' => gmdate("i:s", $t['duration'] ?? 0),
-                        ];
-                    }, array_slice($filtered, 0, 5));
-                }
-
-                return [];
-            } catch (\Exception $e) {
-                Log::error('Jamendo recommendations fetch failed: ' . $e->getMessage());
+            if (!$response->successful()) {
                 return [];
             }
-        });
+
+            $results = $response->json('results') ?? [];
+            if (empty($results)) {
+                return [];
+            }
+
+            $track = $results[0];
+            $artistId = $track['artist_id'] ?? null;
+            
+            // Get genres from musicinfo
+            $genres = $track['musicinfo']['tags']['genres'] ?? [];
+            
+            $params = [
+                'client_id' => $this->clientId,
+                'format' => 'json',
+                'limit' => 10,
+                'order' => 'popularity_total',
+                'imagesize' => '200',
+            ];
+
+            // If genres are available, use fuzzytags for recommendations
+            if (!empty($genres)) {
+                $params['fuzzytags'] = implode(' ', array_slice($genres, 0, 2));
+            } elseif ($artistId) {
+                $params['artist_id'] = $artistId;
+            } else {
+                $params['order'] = 'popularity_total';
+            }
+
+            $recResponse = Http::timeout(10)->get($this->baseUrl . '/tracks/', $params);
+
+            if ($recResponse->successful()) {
+                $recResults = $recResponse->json('results') ?? [];
+                
+                // Exclude the current track
+                $filtered = array_filter($recResults, function ($t) use ($trackId) {
+                    return $t['id'] !== $trackId;
+                });
+
+                $data = array_map(function ($t) {
+                    return [
+                        'id' => $t['id'],
+                        'type' => 'video',
+                        'title' => $t['name'] ?? 'Unknown',
+                        'artist' => $t['artist_name'] ?? 'Unknown Artist',
+                        'thumbnail' => $t['image'] ?? $t['album_image'] ?? '',
+                        'duration' => gmdate("i:s", $t['duration'] ?? 0),
+                    ];
+                }, array_slice($filtered, 0, 5));
+
+                if (!empty($data)) {
+                    Cache::put($cacheKey, $data, now()->addMinutes(60));
+                }
+
+                return $data;
+            }
+
+            return [];
+        } catch (\Exception $e) {
+            Log::error('Jamendo recommendations fetch failed: ' . $e->getMessage());
+            return [];
+        }
     }
 }

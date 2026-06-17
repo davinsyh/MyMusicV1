@@ -462,7 +462,18 @@
                     this.isLoading = true;
                     this.recommendations = [];
 
-                    if (this.mockInterval) clearInterval(this.mockInterval);
+                    // Reset current audio playback immediately to avoid overlapping audio
+                    this.$refs.audioEl.pause();
+                    this.$refs.audioEl.removeAttribute('src');
+                    this.$refs.audioEl.load();
+                    this.isPlaying = false;
+                    this.currentTime = 0;
+                    this.progress = 0;
+
+                    if (this.mockInterval) {
+                        clearInterval(this.mockInterval);
+                        this.mockInterval = null;
+                    }
 
                     this.fetchRecommendations(trackId);
 
@@ -477,12 +488,12 @@
                             this.isPlaying = true;
                         } else {
                             console.error('No stream URL returned');
-                            this.mockPlay();
+                            this.$dispatch('show-toast', 'Gagal memutar lagu: Stream audio tidak tersedia.');
                             this.isLoading = false;
                         }
                     } catch (e) {
                         console.error('Error fetching stream:', e);
-                        this.mockPlay();
+                        this.$dispatch('show-toast', 'Gagal memutar lagu: Terjadi kesalahan koneksi.');
                         this.isLoading = false;
                     }
 
