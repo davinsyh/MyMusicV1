@@ -43,7 +43,8 @@
         <div class="flex items-center gap-2 md:gap-6">
             <button @click="toggleShuffle" :title="isShuffle ? 'Matikan Acak' : 'Nyalakan Acak'"
                 class="material-symbols-outlined hover:text-primary active:scale-95 transition-all text-xl hidden md:block"
-                :class="isShuffle ? 'text-primary' : 'text-on-surface-variant'">shuffle</button>
+                :class="{'text-primary': isShuffle && queue.length > 1, 'text-on-surface-variant': !isShuffle || queue.length <= 1, 'opacity-50 cursor-not-allowed': queue.length <= 1}"
+                :disabled="queue.length <= 1">shuffle</button>
             <button @click="prevTrack" title="Previous"
                 class="material-symbols-outlined text-on-surface hover:text-primary active:scale-95 transition-all text-3xl hidden md:block"
                 :class="{'opacity-50 cursor-not-allowed': currentIndex <= 0 && repeatMode !== 1}"
@@ -175,7 +176,8 @@
                         <div class="flex items-center justify-center gap-8 w-full">
                             <button @click="toggleShuffle" :title="isShuffle ? 'Matikan Acak' : 'Nyalakan Acak'"
                                 class="material-symbols-outlined hover:text-primary active:scale-95 transition-all text-3xl"
-                                :class="isShuffle ? 'text-primary' : 'text-on-surface-variant'">shuffle</button>
+                                :class="{'text-primary': isShuffle && queue.length > 1, 'text-on-surface-variant': !isShuffle || queue.length <= 1, 'opacity-50 cursor-not-allowed': queue.length <= 1}"
+                                :disabled="queue.length <= 1">shuffle</button>
                             <button @click="prevTrack" title="Previous"
                                 class="material-symbols-outlined text-on-surface hover:text-primary active:scale-95 transition-all text-5xl"
                                 :class="{'opacity-50 cursor-not-allowed': currentIndex <= 0 && repeatMode !== 1}"
@@ -358,6 +360,10 @@
                     this.currentIndex = index;
                     this.queueContext = context;
 
+                    if (this.queue.length <= 1) {
+                        this.isShuffle = false;
+                    }
+
                     if (this.isShuffle) {
                         this.applyShuffle();
                     }
@@ -379,6 +385,7 @@
                 },
 
                 toggleShuffle() {
+                    if (this.queue.length <= 1) return;
                     this.isShuffle = !this.isShuffle;
                     if (this.isShuffle) {
                         this.applyShuffle();
