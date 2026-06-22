@@ -4,14 +4,14 @@
     </div>
 
     <!-- Stats -->
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div class="bg-surface dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
-            <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">Total Users</h3>
-            <p class="mt-2 text-3xl font-bold text-gray-900 dark:text-white">{{ $totalUsers }}</p>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-3 max-w-2xl">
+        <div class="bg-surface dark:bg-gray-800 p-4 rounded-lg shadow-sm border border-gray-100 dark:border-gray-700">
+            <h3 class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">Total Users</h3>
+            <p class="mt-1 text-2xl font-bold text-gray-900 dark:text-white">{{ $totalUsers }}</p>
         </div>
-        <div class="bg-surface dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
-            <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">Total Plays</h3>
-            <p class="mt-2 text-3xl font-bold text-gray-900 dark:text-white">{{ $totalPlays }}</p>
+        <div class="bg-surface dark:bg-gray-800 p-4 rounded-lg shadow-sm border border-gray-100 dark:border-gray-700">
+            <h3 class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">Total Plays</h3>
+            <p class="mt-1 text-2xl font-bold text-gray-900 dark:text-white">{{ $totalPlays }}</p>
         </div>
     </div>
 
