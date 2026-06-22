@@ -499,7 +499,7 @@
                                 <p class="font-label-sm text-on-surface-variant truncate" x-text="track.artist"></p>
                             </div>
                             <button
-                                @click.prevent.stop="@auth track.isSaved = !track.isSaved; $dispatch('saveTrackToLibrary', { track: track }) @else showLoginModal = true; @endauth"
+                                @click.prevent.stop="@auth track.isSaved = !track.isSaved; $dispatch('saveTrackToLibrary', { track: track }) @else $dispatch('open-login') @endauth"
                                 :title="track.isSaved ? 'Hapus dari Favorite' : 'Simpan ke Favorite'"
                                 class="material-symbols-outlined hover:text-primary transition-colors ml-3 text-2xl"
                                 :class="track.isSaved ? 'text-primary' : 'text-outline-variant'"
@@ -530,7 +530,7 @@
                                                 x-text="track.artist"></p>
                                         </div>
                                         <button
-                                            @click.prevent.stop="@auth track.isSaved = !track.isSaved; $dispatch('saveTrackToLibrary', { track: track }) @else showLoginModal = true; @endauth"
+                                            @click.prevent.stop="@auth track.isSaved = !track.isSaved; $dispatch('saveTrackToLibrary', { track: track }) @else $dispatch('open-login') @endauth"
                                             :title="track.isSaved ? 'Hapus dari Favorite' : 'Simpan ke Favorite'"
                                             class="material-symbols-outlined hover:text-primary transition-colors ml-3 text-2xl text-outline-variant"
                                             :class="track.isSaved ? 'text-primary' : 'text-outline-variant'"
@@ -997,7 +997,7 @@
                         this.isSaved = !this.isSaved;
                         this.$dispatch('saveTrackToLibrary', { track: this.currentTrack });
                     @else
-                        showLoginModal = true;
+                        this.$dispatch('open-login');
                     @endauth
                 }
             }));

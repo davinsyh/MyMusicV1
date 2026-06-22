@@ -56,7 +56,7 @@
         }
     </style>
 </head>
-<body class="font-body-md text-on-surface bg-background" x-data="{ showLoginModal: {{ $errors->has('login') || $errors->has('password') || session('showLoginModal') ? 'true' : 'false' }}, showRegisterModal: false, showOtpModal: false, sidebarCollapsed: localStorage.getItem('sidebarCollapsed') === 'true', darkMode: localStorage.getItem('darkMode') === 'true' || (!('darkMode' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches) }" x-effect="localStorage.setItem('sidebarCollapsed', sidebarCollapsed); localStorage.setItem('darkMode', darkMode); document.documentElement.classList.toggle('dark', darkMode)">
+<body class="font-body-md text-on-surface bg-background" x-data="{ showLoginModal: {{ $errors->has('login') || $errors->has('password') || session('showLoginModal') ? 'true' : 'false' }}, showRegisterModal: false, showOtpModal: false, sidebarCollapsed: localStorage.getItem('sidebarCollapsed') === 'true', darkMode: localStorage.getItem('darkMode') === 'true' || (!('darkMode' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches) }" x-effect="localStorage.setItem('sidebarCollapsed', sidebarCollapsed); localStorage.setItem('darkMode', darkMode); document.documentElement.classList.toggle('dark', darkMode)" @open-login.window="showLoginModal = true">
     <!-- Splash Screen Pemuatan Awal -->
     <div id="app-loader">
         <div class="flex flex-col items-center gap-6">
