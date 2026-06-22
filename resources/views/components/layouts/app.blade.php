@@ -28,6 +28,23 @@
     </script>
 </head>
 <body class="font-body-md text-on-surface bg-background" x-data="{ showLoginModal: {{ $errors->has('login') || $errors->has('password') || session('showLoginModal') ? 'true' : 'false' }}, showRegisterModal: false, showOtpModal: false, sidebarCollapsed: localStorage.getItem('sidebarCollapsed') === 'true', darkMode: localStorage.getItem('darkMode') === 'true' || (!('darkMode' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches) }" x-effect="localStorage.setItem('sidebarCollapsed', sidebarCollapsed); localStorage.setItem('darkMode', darkMode); document.documentElement.classList.toggle('dark', darkMode)">
+    <!-- Splash Screen Pemuatan Awal -->
+    <div id="app-loader" class="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-background transition-opacity duration-300">
+        <div class="flex flex-col items-center gap-6">
+            <!-- Logo Berputar / Berdenyut (Pulse) -->
+            <img src="{{ asset('images/logoTanpaTulisan.png') }}" alt="MyMusic Logo" class="h-24 w-24 animate-pulse">
+            
+            <!-- Logo Teks (Light Mode vs Dark Mode) -->
+            <img src="{{ asset('images/tulisanTanpaLogo.png') }}" alt="MyMusic" class="h-10 object-contain dark:hidden">
+            <img src="{{ asset('images/tulisanTanpaLogoWarnaPutih.png') }}" alt="MyMusic" class="h-10 object-contain hidden dark:block">
+            
+            <!-- Indikator Putar (Spinner) -->
+            <div class="mt-4 flex items-center justify-center">
+                <div class="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+            </div>
+        </div>
+    </div>
+
     <!-- Sidebar Navigation -->
     <aside id="sidebar" :class="sidebarCollapsed ? 'collapsed' : ''" class="fixed left-0 top-16 h-[calc(100vh-4rem)] flex flex-col px-margin pb-margin gap-unit bg-background w-64 border-r-2 border-on-background shadow-[4px_0px_0px_0px_rgba(28,27,27,1)] z-40 transition-all duration-300">
         <nav class="flex flex-col gap-4 shrink-0 pt-2">
@@ -190,5 +207,23 @@
     </div>
 
     @livewireScripts
+    <script>
+        // Fungsi untuk menyembunyikan splash screen
+        function hideAppLoader() {
+            const loader = document.getElementById('app-loader');
+            if (loader && !loader.classList.contains('opacity-0')) {
+                loader.classList.add('opacity-0');
+                setTimeout(() => {
+                    loader.remove();
+                }, 300); // Menunggu transisi fade-out selesai
+            }
+        }
+
+        // Sembunyikan setelah semua aset selesai dimuat
+        window.addEventListener('load', hideAppLoader);
+
+        // Batas waktu toleransi 3 detik (fallback)
+        setTimeout(hideAppLoader, 3000);
+    </script>
 </body>
 </html>
