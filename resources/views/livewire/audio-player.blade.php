@@ -732,12 +732,12 @@
                             this.isPlaying = true;
                         } else {
                             console.error('No stream URL returned');
-                            this.$el.dispatchEvent(new CustomEvent('show-toast', { detail: 'Gagal memutar lagu: Stream audio tidak tersedia.', bubbles: true, composed: true }));
+                            window.dispatchEvent(new CustomEvent('show-toast', { detail: 'Gagal memutar lagu: Stream audio tidak tersedia.' }));
                             this.isLoading = false;
                         }
                     } catch (e) {
                         console.error('Error fetching stream:', e);
-                        this.$el.dispatchEvent(new CustomEvent('show-toast', { detail: 'Gagal memutar lagu: Terjadi kesalahan koneksi.', bubbles: true, composed: true }));
+                        window.dispatchEvent(new CustomEvent('show-toast', { detail: 'Gagal memutar lagu: Terjadi kesalahan koneksi.' }));
                         this.isLoading = false;
                     }
 
@@ -995,9 +995,9 @@
                     if (!this.currentTrack) return;
                     @auth
                         this.isSaved = !this.isSaved;
-                        this.$el.dispatchEvent(new CustomEvent('saveTrackToLibrary', { detail: { track: this.currentTrack }, bubbles: true, composed: true }));
+                        window.dispatchEvent(new CustomEvent('saveTrackToLibrary', { detail: { track: this.currentTrack } }));
                     @else
-                        this.$el.dispatchEvent(new CustomEvent('open-login', { bubbles: true, composed: true }));
+                        window.dispatchEvent(new CustomEvent('open-login'));
                     @endauth
                 }
             }));
