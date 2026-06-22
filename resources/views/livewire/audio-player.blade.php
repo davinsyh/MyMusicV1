@@ -209,19 +209,19 @@
                         <!-- Vinyl & Sleeve Container -->
                         <div class="relative w-full max-w-[280px] sm:max-w-[320px] aspect-square mb-6 flex items-center justify-center">
                             <!-- Vinyl Disc -->
-                            <div class="absolute w-[90%] aspect-square rounded-full bg-[#151515] border-4 border-on-background shadow-lg transition-transform duration-1000 flex items-center justify-center"
+                            <div class="absolute w-[90%] aspect-square rounded-full bg-[#111111] border-4 border-neutral-950 shadow-lg transition-transform duration-1000 flex items-center justify-center"
                                 :class="isPlaying ? 'md:translate-x-1/4 translate-x-[15%] animate-[spin_12s_linear_infinite]' : 'translate-x-0'"
                                 style="z-index: 5;">
                                 <!-- Vinyl Grooves -->
-                                <div class="absolute inset-4 rounded-full border border-on-background/10"></div>
-                                <div class="absolute inset-8 rounded-full border border-on-background/10"></div>
-                                <div class="absolute inset-12 rounded-full border border-on-background/10"></div>
+                                <div class="absolute inset-4 rounded-full border border-neutral-800/40"></div>
+                                <div class="absolute inset-8 rounded-full border border-neutral-800/40"></div>
+                                <div class="absolute inset-12 rounded-full border border-neutral-800/40"></div>
                                 <!-- Center Label -->
-                                <div class="absolute w-1/3 aspect-square rounded-full border-2 border-on-background bg-primary-container overflow-hidden">
+                                <div class="absolute w-1/3 aspect-square rounded-full border-2 border-neutral-950 bg-primary-container overflow-hidden">
                                     <img :src="currentTrack.thumbnail" class="w-full h-full object-cover animate-[spin_12s_linear_infinite]" :style="isPlaying ? '' : 'animation-play-state: paused;'">
                                 </div>
                                 <!-- Pin Hole -->
-                                <div class="absolute w-4 h-4 rounded-full bg-[#1c1b1b] border-2 border-on-background z-10"></div>
+                                <div class="absolute w-4 h-4 rounded-full bg-[#1c1b1b] border-2 border-neutral-900 z-10"></div>
                             </div>
                             <!-- Album Sleeve (Cover) -->
                             <div class="sketchy-border w-[90%] aspect-square bg-surface shadow-[8px_8px_0px_0px_rgba(28,27,27,1)] overflow-hidden relative group"
