@@ -26,17 +26,46 @@
             document.documentElement.classList.add('dark');
         }
     </script>
+    <style>
+        /* Inline CSS untuk Splash Screen mencegah FOUC (Flash of Unstyled Content) */
+        #app-loader {
+            position: fixed;
+            inset: 0;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background-color: #fcf9f8;
+            transition: opacity 0.3s ease;
+        }
+        html.dark #app-loader {
+            background-color: #1c1b1b;
+        }
+        #app-loader .logo-dark-text {
+            display: none;
+        }
+        #app-loader .logo-light-text {
+            display: block;
+        }
+        html.dark #app-loader .logo-dark-text {
+            display: block;
+        }
+        html.dark #app-loader .logo-light-text {
+            display: none;
+        }
+    </style>
 </head>
 <body class="font-body-md text-on-surface bg-background" x-data="{ showLoginModal: {{ $errors->has('login') || $errors->has('password') || session('showLoginModal') ? 'true' : 'false' }}, showRegisterModal: false, showOtpModal: false, sidebarCollapsed: localStorage.getItem('sidebarCollapsed') === 'true', darkMode: localStorage.getItem('darkMode') === 'true' || (!('darkMode' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches) }" x-effect="localStorage.setItem('sidebarCollapsed', sidebarCollapsed); localStorage.setItem('darkMode', darkMode); document.documentElement.classList.toggle('dark', darkMode)">
     <!-- Splash Screen Pemuatan Awal -->
-    <div id="app-loader" class="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-background transition-opacity duration-300">
+    <div id="app-loader">
         <div class="flex flex-col items-center gap-6">
             <!-- Logo Berputar / Berdenyut (Pulse) -->
             <img src="{{ asset('images/logoTanpaTulisan.png') }}" alt="MyMusic Logo" class="h-24 w-24 animate-pulse">
             
             <!-- Logo Teks (Light Mode vs Dark Mode) -->
-            <img src="{{ asset('images/tulisanTanpaLogo.png') }}" alt="MyMusic" class="h-10 object-contain dark:hidden">
-            <img src="{{ asset('images/tulisanTanpaLogoWarnaPutih.png') }}" alt="MyMusic" class="h-10 object-contain hidden dark:block">
+            <img src="{{ asset('images/tulisanTanpaLogo.png') }}" alt="MyMusic" class="h-10 object-contain logo-light-text">
+            <img src="{{ asset('images/tulisanTanpaLogoWarnaPutih.png') }}" alt="MyMusic" class="h-10 object-contain logo-dark-text">
             
             <!-- Indikator Putar (Spinner) -->
             <div class="mt-4 flex items-center justify-center">
