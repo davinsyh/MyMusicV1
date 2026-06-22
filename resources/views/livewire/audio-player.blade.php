@@ -202,8 +202,11 @@
                 :style="isHovered ? 'width: 90px; opacity: 1; pointer-events: auto; margin-left: 8px;' : 'width: 0px; opacity: 0; pointer-events: none; margin-left: 0;'">
                 <div class="h-2 w-[82px] sketchy-border bg-surface-container-highest rounded-full cursor-pointer relative shrink-0"
                     @mousedown="startVolumeDrag($event)" @touchstart="startVolumeDrag($event.touches[0])">
-                    <div class="h-full bg-primary-container border-r-2 border-on-background"
+                    <div class="h-full bg-primary-container border-r border-on-background rounded-l-full"
                         :class="{'transition-all': !isDraggingVolume}" :style="'width: ' + (volume * 100) + '%'"></div>
+                    <!-- Volume Handle Dot (YouTube style) -->
+                    <div class="absolute w-3.5 h-3.5 bg-on-background rounded-full top-1/2 -translate-y-1/2 -translate-x-1/2 border border-surface shadow-sm"
+                        :class="{'transition-all': !isDraggingVolume}" :style="'left: ' + (volume * 100) + '%'"></div>
                 </div>
             </div>
         </div>
@@ -426,9 +429,12 @@
                                     <div class="h-2 w-[82px] sketchy-border bg-surface-container-highest rounded-full cursor-pointer relative shrink-0"
                                         @mousedown="startVolumeDrag($event)"
                                         @touchstart="startVolumeDrag($event.touches[0])">
-                                        <div class="h-full bg-primary-container border-r-2 border-on-background"
+                                        <div class="h-full bg-primary-container border-r border-on-background rounded-l-full"
                                             :class="{'transition-all': !isDraggingVolume}"
                                             :style="'width: ' + (volume * 100) + '%'"></div>
+                                        <!-- Volume Handle Dot (YouTube style) -->
+                                        <div class="absolute w-3.5 h-3.5 bg-on-background rounded-full top-1/2 -translate-y-1/2 -translate-x-1/2 border border-surface shadow-sm"
+                                            :class="{'transition-all': !isDraggingVolume}" :style="'left: ' + (volume * 100) + '%'"></div>
                                     </div>
                                 </div>
                             </div>
