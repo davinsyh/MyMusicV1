@@ -1,4 +1,4 @@
-<div class="space-y-16 pb-24">
+<div class="space-y-10 pb-24">
     <!-- Dynamic Greeting Section -->
     <section class="mt-8 px-margin" x-data="{ hour: new Date().getHours() }">
         <div class="relative inline-block">
@@ -13,13 +13,13 @@
 
     <!-- Recently Played Section -->
     @if(count($recentlyPlayed) > 0)
-        <section class="mt-12 px-margin"
+        <section class="px-margin"
             x-data="{ tracks: {{ collect($recentlyPlayed->take(10))->map(fn($p) => ['id' => $p->yt_track_id, 'title' => $p->track_title, 'artist' => $p->artist_name, 'thumbnail' => $p->thumbnail_url])->toJson() }} }">
             <div class="flex items-center justify-between mb-6">
                 <h3 class="font-headline-md text-headline-md text-on-surface">{{ __('Recently Played') }}</h3>
             </div>
 
-            <div class="flex gap-6 overflow-x-auto pb-8 custom-scrollbar">
+            <div class="flex gap-5 overflow-x-auto pb-8 custom-scrollbar">
                 @foreach($recentlyPlayed->take(10) as $index => $play)
                     @php
                         $rotation = ($index % 2 == 0) ? '-1.5deg' : '1.2deg';
@@ -75,7 +75,7 @@
         </section>
     @else
         <!-- Empty State Section: Your Daily Mix -->
-        <section class="mt-16 px-margin">
+        <section class="px-margin">
             <div
                 class="sketchy-border p-12 bg-surface-container border-dashed flex flex-col items-center justify-center text-center rotate-[0.5deg]">
                 <div class="mb-6 relative">
@@ -96,7 +96,7 @@
     <!-- Dynamic Sections from Spotify API (New Releases, Featured Playlists, etc) -->
     @foreach($sections as $sectionIndex => $section)
         @if(count($section['contents']) > 0)
-            <section class="mt-16 px-margin" x-data="{ tracks: {{ collect($section['contents'])->toJson() }} }">
+            <section class="px-margin" x-data="{ tracks: {{ collect($section['contents'])->toJson() }} }">
                 <h3 class="font-headline-md text-headline-md text-on-surface mb-6 flex items-center">
                     @if(str_contains(strtolower($section['title']), 'shorts'))
                         <span class="material-symbols-outlined text-[#ff0000] text-4xl mr-2"
@@ -105,7 +105,7 @@
                     {{ $section['title'] }}
                 </h3>
 
-                <div class="flex overflow-x-auto gap-8 pb-8 custom-scrollbar">
+                <div class="flex overflow-x-auto gap-6 pb-8 custom-scrollbar">
                     @foreach($section['contents'] as $index => $track)
                         @php
                             $rotation = ($index % 2 == 0) ? '-1deg' : '1.5deg';
