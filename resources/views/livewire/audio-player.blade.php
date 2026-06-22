@@ -1,5 +1,17 @@
 <div x-data="audioPlayer()" x-on:play-track.window="playTrack($event.detail)"
     class="w-full h-full flex flex-row items-center justify-between" wire:ignore>
+    <style>
+        @keyframes equalizer-bar-1 { 0%, 100% { height: 8px; } 50% { height: 28px; } }
+        @keyframes equalizer-bar-2 { 0%, 100% { height: 12px; } 50% { height: 38px; } }
+        @keyframes equalizer-bar-3 { 0%, 100% { height: 6px; } 50% { height: 22px; } }
+        @keyframes equalizer-bar-4 { 0%, 100% { height: 10px; } 50% { height: 32px; } }
+        @keyframes equalizer-bar-5 { 0%, 100% { height: 4px; } 50% { height: 18px; } }
+        .animate-equalizer-1 { animation: equalizer-bar-1 0.8s ease-in-out infinite; }
+        .animate-equalizer-2 { animation: equalizer-bar-2 1.2s ease-in-out infinite; }
+        .animate-equalizer-3 { animation: equalizer-bar-3 0.9s ease-in-out infinite; }
+        .animate-equalizer-4 { animation: equalizer-bar-4 1.4s ease-in-out infinite; }
+        .animate-equalizer-5 { animation: equalizer-bar-5 1.1s ease-in-out infinite; }
+    </style>
 
     <!-- Left: Song Info -->
     <div class="flex items-center gap-2 md:gap-4 flex-1 md:w-1/3 min-w-0 pr-2">
@@ -156,6 +168,16 @@
             class="fixed inset-0 z-[100] bg-surface flex flex-col md:flex-row overflow-y-auto md:overflow-hidden"
             style="display: none;">
 
+            <!-- Ambient Blurred Backdrop -->
+            <div class="absolute inset-0 -z-10 overflow-hidden pointer-events-none">
+                <template x-if="currentTrack">
+                    <img :src="currentTrack.thumbnail" class="w-full h-full object-cover filter blur-[100px] opacity-[0.22] scale-125 transition-all duration-1000">
+                </template>
+                <template x-if="!currentTrack">
+                    <div class="w-full h-full bg-gradient-to-tr from-primary-container/10 to-secondary-container/10"></div>
+                </template>
+            </div>
+
             <button @click="expanded = false"
                 class="absolute top-6 left-6 p-2 rounded-full bg-surface border-[2px] border-text-main shadow-[2px_2px_0px_#111827] hover:-translate-y-1 hover:shadow-[4px_4px_0px_#49B6E5] text-text-main z-[110] transition-all">
                 <span class="material-symbols-outlined">expand_more</span>
@@ -164,15 +186,64 @@
             <!-- Left Column: Album Art & Controls -->
             <div
                 class="w-full md:w-2/3 min-h-[100dvh] md:min-h-0 md:h-full shrink-0 flex flex-col items-center justify-center p-8 border-b-2 md:border-b-0 md:border-r-2 border-on-background border-dashed gap-8 relative">
+                
+                <!-- Empty State: No Track Playing -->
+                <template x-if="!currentTrack">
+                    <div class="flex flex-col items-center justify-center text-center p-8 max-w-sm">
+                        <div class="relative w-48 h-48 mb-8 flex items-center justify-center">
+                            <!-- Stylized Vinyl Disc Outlines -->
+                            <div class="absolute inset-0 rounded-full border-4 border-dashed border-primary/20 animate-[spin_20s_linear_infinite]"></div>
+                            <div class="absolute inset-4 rounded-full border-2 border-on-background/10 bg-surface/50 flex items-center justify-center">
+                                <span class="material-symbols-outlined text-6xl text-primary-container/60 floating-doodle" style="font-variation-settings: 'FILL' 1;">music_note</span>
+                            </div>
+                        </div>
+                        <h3 class="font-headline-md text-[22px] text-on-surface mb-2">Pilih Lagu Favorit Anda</h3>
+                        <p class="font-body-md text-on-surface-variant text-[13px] leading-relaxed">
+                            Jelajahi Beranda atau gunakan fitur pencarian untuk menemukan lagu dan memulai pemutaran musik.
+                        </p>
+                    </div>
+                </template>
+
                 <template x-if="currentTrack">
                     <div class="flex flex-col items-center w-full max-w-md">
-                        <!-- Album Art -->
-                        <div
-                            class="sketchy-border w-full aspect-square bg-surface shadow-[8px_8px_0px_0px_rgba(28,27,27,1)] overflow-hidden relative rotate-[-1deg] group mb-6">
-                            <img :src="currentTrack.thumbnail"
-                                class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700">
-                            <!-- Subtle gradient overlay -->
-                            <div class="absolute inset-0 bg-gradient-to-t from-background/50 to-transparent"></div>
+                        <!-- Vinyl & Sleeve Container -->
+                        <div class="relative w-full max-w-[280px] sm:max-w-[320px] aspect-square mb-6 flex items-center justify-center">
+                            <!-- Vinyl Disc -->
+                            <div class="absolute w-[90%] aspect-square rounded-full bg-[#151515] border-4 border-on-background shadow-lg transition-transform duration-1000 flex items-center justify-center"
+                                :class="isPlaying ? 'md:translate-x-1/4 translate-x-[15%] animate-[spin_12s_linear_infinite]' : 'translate-x-0'"
+                                style="z-index: 5;">
+                                <!-- Vinyl Grooves -->
+                                <div class="absolute inset-4 rounded-full border border-on-background/10"></div>
+                                <div class="absolute inset-8 rounded-full border border-on-background/10"></div>
+                                <div class="absolute inset-12 rounded-full border border-on-background/10"></div>
+                                <!-- Center Label -->
+                                <div class="absolute w-1/3 aspect-square rounded-full border-2 border-on-background bg-primary-container overflow-hidden">
+                                    <img :src="currentTrack.thumbnail" class="w-full h-full object-cover animate-[spin_12s_linear_infinite]" :style="isPlaying ? '' : 'animation-play-state: paused;'">
+                                </div>
+                                <!-- Pin Hole -->
+                                <div class="absolute w-4 h-4 rounded-full bg-[#1c1b1b] border-2 border-on-background z-10"></div>
+                            </div>
+                            <!-- Album Sleeve (Cover) -->
+                            <div class="sketchy-border w-[90%] aspect-square bg-surface shadow-[8px_8px_0px_0px_rgba(28,27,27,1)] overflow-hidden relative group"
+                                style="z-index: 10;">
+                                <img :src="currentTrack.thumbnail" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700">
+                                <!-- Subtle gradient overlay -->
+                                <div class="absolute inset-0 bg-gradient-to-t from-background/50 to-transparent"></div>
+                            </div>
+                        </div>
+
+                        <!-- Ambient Bouncing Equalizer -->
+                        <div class="flex items-end justify-center gap-[6px] h-10 w-full mb-4 px-2" x-show="isPlaying">
+                            <div class="w-1.5 h-8 bg-primary rounded-full animate-equalizer-1"></div>
+                            <div class="w-1.5 h-10 bg-primary-container rounded-full animate-equalizer-2"></div>
+                            <div class="w-1.5 h-6 bg-tertiary rounded-full animate-equalizer-3"></div>
+                            <div class="w-1.5 h-9 bg-primary rounded-full animate-equalizer-4"></div>
+                            <div class="w-1.5 h-5 bg-primary-container rounded-full animate-equalizer-5"></div>
+                            <div class="w-1.5 h-7 bg-tertiary-container rounded-full animate-equalizer-2"></div>
+                            <div class="w-1.5 h-9 bg-primary rounded-full animate-equalizer-1"></div>
+                            <div class="w-1.5 h-6 bg-primary-container rounded-full animate-equalizer-3"></div>
+                            <div class="w-1.5 h-8 bg-tertiary rounded-full animate-equalizer-4"></div>
+                            <div class="w-1.5 h-4 bg-primary rounded-full animate-equalizer-5"></div>
                         </div>
 
                         <!-- Track Info & Favorite -->
