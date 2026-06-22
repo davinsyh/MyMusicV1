@@ -29,7 +29,7 @@
                             $rotation = '2deg';
                     @endphp
                     <!-- Track Card -->
-                    <div class="flex-none w-64 sketchy-border p-4 bg-surface block-shadow group cursor-pointer"
+                    <div class="flex-none w-48 sketchy-border p-3 bg-surface block-shadow group cursor-pointer"
                         style="transform: rotate({{ $rotation }});"
                         x-on:click="$dispatch('play-queue', { queue: [tracks[{{ $index }}]], index: 0 })">
                         <div class="relative aspect-square mb-4 overflow-hidden rounded">
@@ -42,9 +42,9 @@
                                     style="font-variation-settings: 'FILL' 1;">play_circle</span>
                             </div>
                         </div>
-                        <h4 class="font-headline-md text-[18px] truncate" title="{{ $play->track_title }}">
+                        <h4 class="font-headline-md text-[14px] truncate" title="{{ $play->track_title }}">
                             {{ $play->track_title }}</h4>
-                        <p class="font-label-sm text-on-surface-variant text-[12px] truncate">{{ $play->artist_name }}</p>
+                        <p class="font-label-sm text-on-surface-variant text-[10px] truncate">{{ $play->artist_name }}</p>
 
                         <div class="absolute bottom-2 right-2 z-10" x-data="{ open: false }">
                             <button @click.prevent.stop="open = !open" @click.away="open = false"
@@ -116,8 +116,8 @@
                             $isShort = str_contains(strtolower($section['title']), 'shorts');
                         @endphp
                         <!-- Carousel Card -->
-                        <div class="flex-none {{ $isShort ? 'w-48' : 'w-72' }} relative">
-                            <div class="sketchy-border p-4 bg-surface block-shadow group cursor-pointer transition-all hover:rotate-[0deg]"
+                        <div class="flex-none {{ $isShort ? 'w-36' : 'w-[216px]' }} relative">
+                            <div class="sketchy-border p-3 bg-surface block-shadow group cursor-pointer transition-all hover:rotate-[0deg]"
                                 style="transform: rotate({{ $rotation }});" @if(isset($track['type']) && $track['type'] !== 'video')
                                 x-on:click="Livewire.navigate('{{ route('playlist.show', $track['id']) }}')" @else
                                 x-on:click="$dispatch('play-queue', { queue: [tracks[{{ $index }}]], index: 0 })" @endif>
@@ -132,9 +132,9 @@
                                             style="font-variation-settings: 'FILL' 1;">play_circle</span>
                                     </div>
                                 </div>
-                                <h4 class="font-headline-md text-[20px] line-clamp-2 leading-tight" title="{{ $track['title'] }}">
+                                <h4 class="font-headline-md text-[15px] line-clamp-2 leading-tight" title="{{ $track['title'] }}">
                                     {{ $track['title'] }}</h4>
-                                <p class="font-label-sm text-on-surface-variant truncate mt-1">{{ $track['artist'] }}</p>
+                                <p class="font-label-sm text-on-surface-variant text-[10px] truncate mt-1">{{ $track['artist'] }}</p>
 
                                 <!-- Sketchy Dropdown Menu -->
                                 <div class="absolute top-2 right-2 z-10" x-data="{ open: false }">
