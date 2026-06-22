@@ -1,16 +1,85 @@
 <div x-data="audioPlayer()" x-on:play-track.window="playTrack($event.detail)"
     class="w-full h-full flex flex-row items-center justify-between" wire:ignore>
     <style>
-        @keyframes equalizer-bar-1 { 0%, 100% { height: 8px; } 50% { height: 28px; } }
-        @keyframes equalizer-bar-2 { 0%, 100% { height: 12px; } 50% { height: 38px; } }
-        @keyframes equalizer-bar-3 { 0%, 100% { height: 6px; } 50% { height: 22px; } }
-        @keyframes equalizer-bar-4 { 0%, 100% { height: 10px; } 50% { height: 32px; } }
-        @keyframes equalizer-bar-5 { 0%, 100% { height: 4px; } 50% { height: 18px; } }
-        .animate-equalizer-1 { animation: equalizer-bar-1 0.8s ease-in-out infinite; }
-        .animate-equalizer-2 { animation: equalizer-bar-2 1.2s ease-in-out infinite; }
-        .animate-equalizer-3 { animation: equalizer-bar-3 0.9s ease-in-out infinite; }
-        .animate-equalizer-4 { animation: equalizer-bar-4 1.4s ease-in-out infinite; }
-        .animate-equalizer-5 { animation: equalizer-bar-5 1.1s ease-in-out infinite; }
+        @keyframes equalizer-bar-1 {
+
+            0%,
+            100% {
+                height: 8px;
+            }
+
+            50% {
+                height: 28px;
+            }
+        }
+
+        @keyframes equalizer-bar-2 {
+
+            0%,
+            100% {
+                height: 12px;
+            }
+
+            50% {
+                height: 38px;
+            }
+        }
+
+        @keyframes equalizer-bar-3 {
+
+            0%,
+            100% {
+                height: 6px;
+            }
+
+            50% {
+                height: 22px;
+            }
+        }
+
+        @keyframes equalizer-bar-4 {
+
+            0%,
+            100% {
+                height: 10px;
+            }
+
+            50% {
+                height: 32px;
+            }
+        }
+
+        @keyframes equalizer-bar-5 {
+
+            0%,
+            100% {
+                height: 4px;
+            }
+
+            50% {
+                height: 18px;
+            }
+        }
+
+        .animate-equalizer-1 {
+            animation: equalizer-bar-1 0.8s ease-in-out infinite;
+        }
+
+        .animate-equalizer-2 {
+            animation: equalizer-bar-2 1.2s ease-in-out infinite;
+        }
+
+        .animate-equalizer-3 {
+            animation: equalizer-bar-3 0.9s ease-in-out infinite;
+        }
+
+        .animate-equalizer-4 {
+            animation: equalizer-bar-4 1.4s ease-in-out infinite;
+        }
+
+        .animate-equalizer-5 {
+            animation: equalizer-bar-5 1.1s ease-in-out infinite;
+        }
     </style>
 
     <!-- Left: Song Info -->
@@ -97,8 +166,7 @@
                 @mousedown="startSeekDrag($event)" @touchstart="startSeekDrag($event.touches[0])"
                 @mousemove="hoverProgress($event)" @mouseleave="hoverTime = ''" :title="hoverTime">
                 <div class="h-full bg-primary-container border-r-2 border-on-background relative rounded-l-full"
-                    :class="{'transition-all': !isDraggingSeek}"
-                    :style="'width: ' + progress + '%'"></div>
+                    :class="{'transition-all': !isDraggingSeek}" :style="'width: ' + progress + '%'"></div>
             </div>
             <span class="font-label-sm text-[10px] text-on-surface-variant w-8"
                 x-text="formatTime(duration)">0:00</span>
@@ -108,8 +176,7 @@
     <!-- Right: Extra Controls -->
     <div class="hidden md:flex items-center justify-end gap-4 w-1/3 min-w-0">
         <!-- Volume Control Group (YouTube-like Hover) -->
-        <div class="flex items-center transition-all duration-300 ease-in-out select-none hidden sm:flex h-8"
-             x-data="{ 
+        <div class="flex items-center transition-all duration-300 ease-in-out select-none hidden sm:flex h-8" x-data="{ 
                  isHovered: false, 
                  hoverTimeout: null,
                  onMouseEnter() {
@@ -125,26 +192,22 @@
                          this.isHovered = false;
                      }, 6000);
                  }
-             }"
-             @mouseenter="onMouseEnter()"
-             @mouseleave="onMouseLeave()"
-             :style="isHovered ? 'width: 140px;' : 'width: 32px;'">
+             }" @mouseenter="onMouseEnter()" @mouseleave="onMouseLeave()"
+            :style="isHovered ? 'width: 140px;' : 'width: 32px;'">
             <button @click="toggleMute"
                 class="material-symbols-outlined text-on-surface-variant hover:text-primary transition-colors text-xl focus:outline-none shrink-0 w-8 h-8 flex items-center justify-center"
                 x-text="volume === 0 ? 'volume_off' : (volume < 0.5 ? 'volume_down' : 'volume_up')">
             </button>
             <div class="overflow-hidden transition-all duration-300 ease-in-out flex items-center h-8"
-                 :style="isHovered ? 'width: 90px; opacity: 1; pointer-events: auto; margin-left: 8px;' : 'width: 0px; opacity: 0; pointer-events: none; margin-left: 0;'">
+                :style="isHovered ? 'width: 90px; opacity: 1; pointer-events: auto; margin-left: 8px;' : 'width: 0px; opacity: 0; pointer-events: none; margin-left: 0;'">
                 <div class="h-2 w-[82px] sketchy-border bg-surface-container-highest rounded-full cursor-pointer relative shrink-0"
-                    @mousedown="startVolumeDrag($event)"
-                    @touchstart="startVolumeDrag($event.touches[0])">
+                    @mousedown="startVolumeDrag($event)" @touchstart="startVolumeDrag($event.touches[0])">
                     <div class="h-full bg-primary-container border-r-2 border-on-background"
-                        :class="{'transition-all': !isDraggingVolume}"
-                        :style="'width: ' + (volume * 100) + '%'"></div>
+                        :class="{'transition-all': !isDraggingVolume}" :style="'width: ' + (volume * 100) + '%'"></div>
                 </div>
             </div>
         </div>
-        <button @click="autoplayMode = !autoplayMode; localStorage.setItem('autoplayMode', autoplayMode)" 
+        <button @click="autoplayMode = !autoplayMode; localStorage.setItem('autoplayMode', autoplayMode)"
             :title="autoplayMode ? 'Matikan Autoplay' : 'Aktifkan Autoplay'"
             class="material-symbols-outlined hover:text-primary active:scale-95 transition-all text-xl"
             :class="autoplayMode ? 'text-primary' : 'text-on-surface-variant'">
@@ -157,7 +220,8 @@
     <!-- Mobile Thin Progress Bar -->
     <div class="absolute bottom-0 left-0 right-0 h-1 bg-surface-container-highest md:hidden"
         @mousedown="startSeekDrag($event)" @touchstart="startSeekDrag($event.touches[0])">
-        <div class="h-full bg-primary" :class="{'transition-all': !isDraggingSeek}" :style="'width: ' + progress + '%'"></div>
+        <div class="h-full bg-primary" :class="{'transition-all': !isDraggingSeek}" :style="'width: ' + progress + '%'">
+        </div>
     </div>
 
     <!-- Maximized Overlay (Watch View) -->
@@ -171,10 +235,12 @@
             <!-- Ambient Blurred Backdrop -->
             <div class="absolute inset-0 -z-10 overflow-hidden pointer-events-none">
                 <template x-if="currentTrack">
-                    <img :src="currentTrack.thumbnail" class="w-full h-full object-cover filter blur-[100px] opacity-[0.22] scale-125 transition-all duration-1000">
+                    <img :src="currentTrack.thumbnail"
+                        class="w-full h-full object-cover filter blur-[100px] opacity-[0.22] scale-125 transition-all duration-1000">
                 </template>
                 <template x-if="!currentTrack">
-                    <div class="w-full h-full bg-gradient-to-tr from-primary-container/10 to-secondary-container/10"></div>
+                    <div class="w-full h-full bg-gradient-to-tr from-primary-container/10 to-secondary-container/10">
+                    </div>
                 </template>
             </div>
 
@@ -186,20 +252,26 @@
             <!-- Left Column: Album Art & Controls -->
             <div
                 class="w-full md:w-2/3 min-h-[100dvh] md:min-h-0 md:h-full shrink-0 flex flex-col items-center justify-center p-8 border-b-2 md:border-b-0 md:border-r-2 border-on-background border-dashed gap-8 relative">
-                
+
                 <!-- Empty State: No Track Playing -->
                 <template x-if="!currentTrack">
                     <div class="flex flex-col items-center justify-center text-center p-8 max-w-sm">
                         <div class="relative w-48 h-48 mb-8 flex items-center justify-center">
                             <!-- Stylized Vinyl Disc Outlines -->
-                            <div class="absolute inset-0 rounded-full border-4 border-dashed border-primary/20 animate-[spin_20s_linear_infinite]"></div>
-                            <div class="absolute inset-4 rounded-full border-2 border-on-background/10 bg-surface/50 flex items-center justify-center">
-                                <span class="material-symbols-outlined text-6xl text-primary-container/60 floating-doodle" style="font-variation-settings: 'FILL' 1;">music_note</span>
+                            <div
+                                class="absolute inset-0 rounded-full border-4 border-dashed border-primary/20 animate-[spin_20s_linear_infinite]">
+                            </div>
+                            <div
+                                class="absolute inset-4 rounded-full border-2 border-on-background/10 bg-surface/50 flex items-center justify-center">
+                                <span
+                                    class="material-symbols-outlined text-6xl text-primary-container/60 floating-doodle"
+                                    style="font-variation-settings: 'FILL' 1;">music_note</span>
                             </div>
                         </div>
                         <h3 class="font-headline-md text-[22px] text-on-surface mb-2">Pilih Lagu Favorit Anda</h3>
                         <p class="font-body-md text-on-surface-variant text-[13px] leading-relaxed">
-                            Jelajahi Beranda atau gunakan fitur pencarian untuk menemukan lagu dan memulai pemutaran musik.
+                            Jelajahi Beranda atau gunakan fitur pencarian untuk menemukan lagu dan memulai pemutaran
+                            musik.
                         </p>
                     </div>
                 </template>
@@ -207,26 +279,33 @@
                 <template x-if="currentTrack">
                     <div class="flex flex-col items-center w-full max-w-md">
                         <!-- Vinyl & Sleeve Container -->
-                        <div class="relative w-full max-w-[280px] sm:max-w-[320px] aspect-square mb-6 flex items-center justify-center">
+                        <div
+                            class="relative w-full max-w-[280px] sm:max-w-[320px] aspect-square mb-6 flex items-center justify-center">
                             <!-- Vinyl Disc -->
-                            <div class="absolute w-[90%] aspect-square rounded-full bg-[#111111] border-4 border-neutral-950 shadow-lg transition-transform duration-1000 flex items-center justify-center"
+                            <div class="absolute w-[90%] aspect-square rounded-full bg-[#151515] border-4 border-on-background shadow-lg transition-transform duration-1000 flex items-center justify-center"
                                 :class="isPlaying ? 'md:translate-x-1/4 translate-x-[15%] animate-[spin_12s_linear_infinite]' : 'translate-x-0'"
                                 style="z-index: 5;">
                                 <!-- Vinyl Grooves -->
-                                <div class="absolute inset-4 rounded-full border border-neutral-800/40"></div>
-                                <div class="absolute inset-8 rounded-full border border-neutral-800/40"></div>
-                                <div class="absolute inset-12 rounded-full border border-neutral-800/40"></div>
+                                <div class="absolute inset-4 rounded-full border border-on-background/10"></div>
+                                <div class="absolute inset-8 rounded-full border border-on-background/10"></div>
+                                <div class="absolute inset-12 rounded-full border border-on-background/10"></div>
                                 <!-- Center Label -->
-                                <div class="absolute w-1/3 aspect-square rounded-full border-2 border-neutral-950 bg-primary-container overflow-hidden">
-                                    <img :src="currentTrack.thumbnail" class="w-full h-full object-cover animate-[spin_12s_linear_infinite]" :style="isPlaying ? '' : 'animation-play-state: paused;'">
+                                <div
+                                    class="absolute w-1/3 aspect-square rounded-full border-2 border-on-background bg-primary-container overflow-hidden">
+                                    <img :src="currentTrack.thumbnail"
+                                        class="w-full h-full object-cover animate-[spin_12s_linear_infinite]"
+                                        :style="isPlaying ? '' : 'animation-play-state: paused;'">
                                 </div>
                                 <!-- Pin Hole -->
-                                <div class="absolute w-4 h-4 rounded-full bg-[#1c1b1b] border-2 border-neutral-900 z-10"></div>
+                                <div
+                                    class="absolute w-4 h-4 rounded-full bg-[#1c1b1b] border-2 border-on-background z-10">
+                                </div>
                             </div>
                             <!-- Album Sleeve (Cover) -->
                             <div class="sketchy-border w-[90%] aspect-square bg-surface shadow-[8px_8px_0px_0px_rgba(28,27,27,1)] overflow-hidden relative group"
                                 style="z-index: 10;">
-                                <img :src="currentTrack.thumbnail" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700">
+                                <img :src="currentTrack.thumbnail"
+                                    class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700">
                                 <!-- Subtle gradient overlay -->
                                 <div class="absolute inset-0 bg-gradient-to-t from-background/50 to-transparent"></div>
                             </div>
@@ -266,11 +345,10 @@
                                 x-text="formatTime(currentTime)">0:00</span>
                             <div class="h-3 flex-grow sketchy-border bg-surface-container-highest rounded-full cursor-pointer group relative"
                                 @mousedown="startSeekDrag($event)" @touchstart="startSeekDrag($event.touches[0])"
-                                @mousemove="hoverProgress($event)" @mouseleave="hoverTime = ''"
-                                :title="hoverTime">
+                                @mousemove="hoverProgress($event)" @mouseleave="hoverTime = ''" :title="hoverTime">
                                 <div class="h-full bg-primary-container border-r-2 border-on-background relative rounded-l-full"
-                                    :class="{'transition-all': !isDraggingSeek}"
-                                    :style="'width: ' + progress + '%'"></div>
+                                    :class="{'transition-all': !isDraggingSeek}" :style="'width: ' + progress + '%'">
+                                </div>
                             </div>
                             <span class="font-label-sm text-[12px] text-on-surface-variant w-10"
                                 x-text="formatTime(duration)">0:00</span>
@@ -314,15 +392,15 @@
                                 class="material-symbols-outlined hover:text-primary active:scale-95 transition-all text-3xl"
                                 :class="repeatMode > 0 ? 'text-primary' : 'text-on-surface-variant'"
                                 x-text="repeatMode === 2 ? 'repeat_one' : 'repeat'">repeat</button>
-                             <button @click="autoplayMode = !autoplayMode; localStorage.setItem('autoplayMode', autoplayMode)" 
-                                 :title="autoplayMode ? 'Matikan Autoplay' : 'Aktifkan Autoplay'"
-                                 class="material-symbols-outlined hover:text-primary active:scale-95 transition-all text-3xl"
-                                 :class="autoplayMode ? 'text-primary' : 'text-on-surface-variant'">
-                                 autoplay
-                             </button>
-                              <!-- Volume Control Group (YouTube-like Hover) in Maximized View -->
-                              <div class="relative hidden md:flex items-center select-none h-9 w-9"
-                                   x-data="{ 
+                            <button
+                                @click="autoplayMode = !autoplayMode; localStorage.setItem('autoplayMode', autoplayMode)"
+                                :title="autoplayMode ? 'Matikan Autoplay' : 'Aktifkan Autoplay'"
+                                class="material-symbols-outlined hover:text-primary active:scale-95 transition-all text-3xl"
+                                :class="autoplayMode ? 'text-primary' : 'text-on-surface-variant'">
+                                autoplay
+                            </button>
+                            <!-- Volume Control Group (YouTube-like Hover) in Maximized View -->
+                            <div class="relative hidden md:flex items-center select-none h-9 w-9" x-data="{ 
                                        isHovered: false, 
                                        hoverTimeout: null,
                                        onMouseEnter() {
@@ -338,24 +416,22 @@
                                                this.isHovered = false;
                                           }, 6000);
                                        }
-                                   }"
-                                   @mouseenter="onMouseEnter()"
-                                   @mouseleave="onMouseLeave()">
-                                  <button @click="toggleMute"
-                                      class="material-symbols-outlined text-on-surface hover:text-primary active:scale-95 transition-all text-3xl focus:outline-none shrink-0 w-9 h-9 flex items-center justify-center"
-                                      x-text="volume === 0 ? 'volume_off' : (volume < 0.5 ? 'volume_down' : 'volume_up')">
-                                  </button>
-                                  <div class="absolute left-full ml-2 top-1/2 -translate-y-1/2 overflow-hidden transition-all duration-300 ease-in-out flex items-center h-9"
-                                       :style="isHovered ? 'width: 90px; opacity: 1; pointer-events: auto;' : 'width: 0px; opacity: 0; pointer-events: none;'">
-                                      <div class="h-2 w-[82px] sketchy-border bg-surface-container-highest rounded-full cursor-pointer relative shrink-0"
-                                          @mousedown="startVolumeDrag($event)"
-                                          @touchstart="startVolumeDrag($event.touches[0])">
-                                          <div class="h-full bg-primary-container border-r-2 border-on-background"
-                                              :class="{'transition-all': !isDraggingVolume}"
-                                              :style="'width: ' + (volume * 100) + '%'"></div>
-                                      </div>
-                                  </div>
-                              </div>
+                                   }" @mouseenter="onMouseEnter()" @mouseleave="onMouseLeave()">
+                                <button @click="toggleMute"
+                                    class="material-symbols-outlined text-on-surface hover:text-primary active:scale-95 transition-all text-3xl focus:outline-none shrink-0 w-9 h-9 flex items-center justify-center"
+                                    x-text="volume === 0 ? 'volume_off' : (volume < 0.5 ? 'volume_down' : 'volume_up')">
+                                </button>
+                                <div class="absolute left-full ml-2 top-1/2 -translate-y-1/2 overflow-hidden transition-all duration-300 ease-in-out flex items-center h-9"
+                                    :style="isHovered ? 'width: 90px; opacity: 1; pointer-events: auto;' : 'width: 0px; opacity: 0; pointer-events: none;'">
+                                    <div class="h-2 w-[82px] sketchy-border bg-surface-container-highest rounded-full cursor-pointer relative shrink-0"
+                                        @mousedown="startVolumeDrag($event)"
+                                        @touchstart="startVolumeDrag($event.touches[0])">
+                                        <div class="h-full bg-primary-container border-r-2 border-on-background"
+                                            :class="{'transition-all': !isDraggingVolume}"
+                                            :style="'width: ' + (volume * 100) + '%'"></div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </template>
@@ -436,14 +512,19 @@
                                 <template x-for="(track, index) in recommendations" :key="'rec_' + index">
                                     <div class="flex items-center p-3 rounded-xl cursor-pointer transition-all sketchy-border hover:bg-secondary-container/30 hover:rotate-[-1deg] bg-surface group"
                                         @click="playRecommended(track)">
-                                        <div class="relative h-14 w-14 shrink-0 rounded-lg overflow-hidden border-2 border-on-background">
-                                            <img :src="track.thumbnail" class="object-cover w-full h-full group-hover:scale-110 transition duration-300">
+                                        <div
+                                            class="relative h-14 w-14 shrink-0 rounded-lg overflow-hidden border-2 border-on-background">
+                                            <img :src="track.thumbnail"
+                                                class="object-cover w-full h-full group-hover:scale-110 transition duration-300">
                                         </div>
                                         <div class="ml-4 flex-1 min-w-0">
-                                            <h4 class="font-headline-md text-[16px] text-on-surface truncate group-hover:text-primary" x-text="track.title"></h4>
-                                            <p class="font-label-sm text-on-surface-variant truncate" x-text="track.artist"></p>
+                                            <h4 class="font-headline-md text-[16px] text-on-surface truncate group-hover:text-primary"
+                                                x-text="track.title"></h4>
+                                            <p class="font-label-sm text-on-surface-variant truncate"
+                                                x-text="track.artist"></p>
                                         </div>
-                                        <button @click.prevent.stop="@auth track.isSaved = !track.isSaved; $dispatch('saveTrackToLibrary', { track: track }) @else showLoginModal = true; @endauth"
+                                        <button
+                                            @click.prevent.stop="@auth track.isSaved = !track.isSaved; $dispatch('saveTrackToLibrary', { track: track }) @else showLoginModal = true; @endauth"
                                             :title="track.isSaved ? 'Hapus dari Favorite' : 'Simpan ke Favorite'"
                                             class="material-symbols-outlined hover:text-primary transition-colors ml-3 text-2xl text-outline-variant"
                                             :class="track.isSaved ? 'text-primary' : 'text-outline-variant'"
@@ -716,13 +797,13 @@
                     this.isDraggingSeek = true;
                     this.activeSeekContainer = e.currentTarget;
                     this.updateSeekFromEvent(e);
-                    
+
                     const onMouseMove = (moveEvent) => {
                         if (this.isDraggingSeek && this.activeSeekContainer) {
                             this.updateSeekFromEvent(moveEvent);
                         }
                     };
-                    
+
                     const onMouseUp = () => {
                         this.isDraggingSeek = false;
                         this.activeSeekContainer = null;
@@ -731,7 +812,7 @@
                         document.removeEventListener('touchmove', onTouchMove);
                         document.removeEventListener('touchend', onMouseUp);
                     };
-                    
+
                     const onTouchMove = (touchEvent) => {
                         if (this.isDraggingSeek && this.activeSeekContainer) {
                             this.updateSeekFromEvent(touchEvent.touches[0]);
@@ -773,13 +854,13 @@
                     this.isDraggingVolume = true;
                     this.activeVolumeContainer = e.currentTarget;
                     this.updateVolumeFromEvent(e);
-                    
+
                     const onMouseMove = (moveEvent) => {
                         if (this.isDraggingVolume && this.activeVolumeContainer) {
                             this.updateVolumeFromEvent(moveEvent);
                         }
                     };
-                    
+
                     const onMouseUp = () => {
                         this.isDraggingVolume = false;
                         this.activeVolumeContainer = null;
@@ -788,7 +869,7 @@
                         document.removeEventListener('touchmove', onTouchMove);
                         document.removeEventListener('touchend', onMouseUp);
                     };
-                    
+
                     const onTouchMove = (touchEvent) => {
                         if (this.isDraggingVolume && this.activeVolumeContainer) {
                             this.updateVolumeFromEvent(touchEvent.touches[0]);
@@ -817,13 +898,13 @@
                     this.isDraggingVolume = true;
                     this.activeVolumeContainer = e.currentTarget;
                     this.updateVolumeFromEventVertical(e);
-                    
+
                     const onMouseMove = (moveEvent) => {
                         if (this.isDraggingVolume && this.activeVolumeContainer) {
                             this.updateVolumeFromEventVertical(moveEvent);
                         }
                     };
-                    
+
                     const onMouseUp = () => {
                         this.isDraggingVolume = false;
                         this.activeVolumeContainer = null;
@@ -832,7 +913,7 @@
                         document.removeEventListener('touchmove', onTouchMove);
                         document.removeEventListener('touchend', onMouseUp);
                     };
-                    
+
                     const onTouchMove = (touchEvent) => {
                         if (this.isDraggingVolume && this.activeVolumeContainer) {
                             this.updateVolumeFromEventVertical(touchEvent.touches[0]);
